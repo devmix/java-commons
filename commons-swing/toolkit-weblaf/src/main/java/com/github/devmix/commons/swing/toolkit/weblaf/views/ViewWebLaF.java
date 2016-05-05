@@ -91,7 +91,7 @@ public final class ViewWebLaF implements View {
     private final VerifiersRegistry verifiers = new DefaultVerifiersRegistry();
 
     @Override
-    public ComponentDecorator<?> name(final String name) {
+    public ComponentDecorator<?> find(final String name) {
         return Objects.requireNonNull(components.find(name));
     }
 

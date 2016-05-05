@@ -23,7 +23,7 @@ import org.testng.annotations.Test;
 import java.util.Locale;
 import java.util.Map;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Sergey Grachev

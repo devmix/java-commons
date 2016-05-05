@@ -22,6 +22,8 @@ import com.github.devmix.commons.swing.api.decorators.ComponentViewDecorator;
 import com.github.devmix.commons.swing.api.decorators.SetupCallable;
 
 import javax.swing.*;
+import javax.swing.event.PopupMenuEvent;
+import java.util.function.Consumer;
 
 /**
  * @author Sergey Grachev
@@ -40,4 +42,6 @@ public interface PopupMenuDecorator extends ComponentViewDecorator<JPopupMenu> {
     PopupMenuDecorator a(JMenuItem menuItem);
 
     PopupMenuDecorator a(MenuItemDecorator menuItem);
+
+    PopupMenuDecorator onPopupMenuWillBecomeVisible(Consumer<PopupMenuEvent> listener);
 }

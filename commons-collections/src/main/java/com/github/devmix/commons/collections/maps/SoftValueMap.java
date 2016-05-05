@@ -16,11 +16,11 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.devmix.commons.swing.core.utils;
+package com.github.devmix.commons.collections.maps;
 
 import javax.annotation.Nullable;
 import java.lang.ref.ReferenceQueue;
-import java.lang.ref.WeakReference;
+import java.lang.ref.SoftReference;
 import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -33,18 +33,23 @@ import java.util.function.Supplier;
  * @author Sergey Grachev
  */
 @SuppressWarnings("NullableProblems")
-public final class WeakValueMap<K, V> implements Map<K, V> {
+public final class SoftValueMap<K, V> implements Map<K, V> {
 
     private final Map<K, WeakValue<K, V>> map;
     private final ReferenceQueue<V> queue = new ReferenceQueue<>();
 
     @SuppressWarnings("UnusedDeclaration")
-    public WeakValueMap() {
-        this(LinkedHashMap::new);
+    public SoftValueMap() {
+        this(new Supplier<Map<K, ?>>() {
+            @Override
+            public Map<K, ?> get() {
+                return new LinkedHashMap<K, Object>();
+            }
+        });
     }
 
     @SuppressWarnings("unchecked")
-    public WeakValueMap(final Supplier<Map<K, ?>> containerFactory) {
+    public SoftValueMap(final Supplier<Map<K, ?>> containerFactory) {
         this.map = (Map<K, WeakValue<K, V>>) containerFactory.get();
     }
 
@@ -178,7 +183,7 @@ public final class WeakValueMap<K, V> implements Map<K, V> {
         map.clear();
     }
 
-    private static final class WeakValue<K, V> extends WeakReference<V> {
+    private static final class WeakValue<K, V> extends SoftReference<V> {
         private final K key;
 
         private WeakValue(final K key, final V value, final ReferenceQueue<V> queue) {

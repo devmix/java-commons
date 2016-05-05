@@ -38,7 +38,7 @@ Java
 ```
     Language lang = LanguageFactory.create(
         new ResourceBundleDataSource("lang-resource-bundle"),
-        LanguageOptions.create().locale(LOCALE));
+        LanguageOptions.create());
 
     lang.of("attribute-1", ArgumentsFactory.plural()); // values
     lang.of("attribute-1", ArgumentsFactory.numeric(11)); // values2 for russian locale

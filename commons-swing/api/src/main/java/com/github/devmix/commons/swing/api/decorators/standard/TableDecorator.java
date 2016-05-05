@@ -39,7 +39,17 @@ public interface TableDecorator extends ComponentViewDecorator<JTable> {
     @Override
     TableDecorator name(String name);
 
+    TableDecorator enableFeature(Feature feature);
+
+    TableDecorator disableFeature(Feature feature);
+
     TableDecorator onMouseClicked(Consumer<MouseEvent> listener);
 
     TableDecorator onMouseReleased(Consumer<MouseEvent> listener);
+
+    TableDecorator popupMenu(PopupMenuDecorator menu);
+
+    enum Feature {
+        SELECT_ROW_ON_RIGHT_CLICK
+    }
 }

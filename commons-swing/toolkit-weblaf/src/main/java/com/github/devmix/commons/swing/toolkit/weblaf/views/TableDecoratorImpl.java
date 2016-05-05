@@ -20,10 +20,12 @@ package com.github.devmix.commons.swing.toolkit.weblaf.views;
 
 import com.alee.laf.table.WebTable;
 import com.github.devmix.commons.swing.api.View;
+import com.github.devmix.commons.swing.api.decorators.standard.PopupMenuDecorator;
 import com.github.devmix.commons.swing.api.decorators.standard.TableDecorator;
 import com.github.devmix.commons.swing.core.listeners.SingletonMouseAdapter;
 
 import java.awt.event.MouseEvent;
+import java.util.EnumSet;
 import java.util.function.Consumer;
 
 /**
@@ -34,6 +36,7 @@ abstract class TableDecoratorImpl extends WebTable implements TableDecorator {
     private static final long serialVersionUID = -5527974482931272811L;
 
     private final ViewWebLaF view;
+    private final EnumSet<Feature> features = EnumSet.noneOf(Feature.class);
     private SingletonMouseAdapter mouseAdapter;
 
     public TableDecoratorImpl(final ViewWebLaF view) {
@@ -43,6 +46,18 @@ abstract class TableDecoratorImpl extends WebTable implements TableDecorator {
     @Override
     public View view() {
         return view;
+    }
+
+    @Override
+    public TableDecorator enableFeature(final Feature feature) {
+        features.add(feature);
+        return this;
+    }
+
+    @Override
+    public TableDecorator disableFeature(final Feature feature) {
+        features.remove(feature);
+        return this;
     }
 
     @Override
@@ -57,9 +72,28 @@ abstract class TableDecoratorImpl extends WebTable implements TableDecorator {
         return this;
     }
 
+    @Override
+    public TableDecorator popupMenu(final PopupMenuDecorator menu) {
+        this.setComponentPopupMenu(menu.$());
+        return this;
+    }
+
     private synchronized SingletonMouseAdapter mouseAdapter() {
         if (mouseAdapter == null) {
-            mouseAdapter = new SingletonMouseAdapter();
+            mouseAdapter = new SingletonMouseAdapter() {
+                @Override
+                public void mouseReleased(final MouseEvent e) {
+                    super.mouseReleased(e);
+                    if (e.isPopupTrigger() && features.contains(Feature.SELECT_ROW_ON_RIGHT_CLICK)) {
+                        final int r = TableDecoratorImpl.this.rowAtPoint(e.getPoint());
+                        if (r >= 0 && r < TableDecoratorImpl.this.getRowCount()) {
+                            TableDecoratorImpl.this.setRowSelectionInterval(r, r);
+                        } else {
+                            TableDecoratorImpl.this.clearSelection();
+                        }
+                    }
+                }
+            };
             this.addMouseListener(mouseAdapter);
         }
         return mouseAdapter;

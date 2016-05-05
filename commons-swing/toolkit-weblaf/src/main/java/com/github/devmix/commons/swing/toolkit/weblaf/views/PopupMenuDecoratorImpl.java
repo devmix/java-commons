@@ -21,8 +21,11 @@ package com.github.devmix.commons.swing.toolkit.weblaf.views;
 import com.github.devmix.commons.swing.api.View;
 import com.github.devmix.commons.swing.api.decorators.standard.MenuItemDecorator;
 import com.github.devmix.commons.swing.api.decorators.standard.PopupMenuDecorator;
+import com.github.devmix.commons.swing.core.listeners.SingletonPopupMenuListener;
 
 import javax.swing.*;
+import javax.swing.event.PopupMenuEvent;
+import java.util.function.Consumer;
 
 /**
  * @author Sergey Grachev
@@ -32,6 +35,7 @@ abstract class PopupMenuDecoratorImpl extends JPopupMenu implements PopupMenuDec
     private static final long serialVersionUID = 454359107402963707L;
 
     private final ViewWebLaF view;
+    private SingletonPopupMenuListener singletonPopupMenuListener;
 
     public PopupMenuDecoratorImpl(final ViewWebLaF view) {
         this.view = view.register(this);
@@ -50,5 +54,19 @@ abstract class PopupMenuDecoratorImpl extends JPopupMenu implements PopupMenuDec
     public PopupMenuDecorator a(final MenuItemDecorator menuItem) {
         add(menuItem.$());
         return this;
+    }
+
+    @Override
+    public PopupMenuDecorator onPopupMenuWillBecomeVisible(final Consumer<PopupMenuEvent> listener) {
+        singletonPopupMenuListener().setPopupMenuWillBecomeVisible(listener);
+        return this;
+    }
+
+    private synchronized SingletonPopupMenuListener singletonPopupMenuListener() {
+        if (singletonPopupMenuListener == null) {
+            singletonPopupMenuListener = new SingletonPopupMenuListener();
+            addPopupMenuListener(singletonPopupMenuListener);
+        }
+        return singletonPopupMenuListener;
     }
 }

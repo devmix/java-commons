@@ -65,9 +65,9 @@
     </licenses>
 
     <scm>
-        <url>https://github.com/devmix/commons</url>
-        <connection>scm:git:git://github.com/devmix/commons.git</connection>
-        <developerConnection>scm:git:git@github.com:devmix/commons.git</developerConnection>
+        <url>https://github.com/devmix/java-commons</url>
+        <connection>scm:git:git://github.com/devmix/java-commons.git</connection>
+        <developerConnection>scm:git:git@github.com:devmix/java-commons.git</developerConnection>
     </scm>
 
     <developers>
@@ -81,7 +81,10 @@
 
     <modules>
         <module>commons-i18n</module>
+        <module>commons-collections</module>
+        <module>commons-adapters</module>
         <module>commons-swing</module>
+        <module>commons-javafx</module>
     </modules>
 
     <properties>
@@ -109,6 +112,9 @@
                     <configuration>
                         <source>${maven.compiler.source}</source>
                         <target>${maven.compiler.target}</target>
+                        <compilerArgs>
+                            <arg>-Xlint:deprecation,unchecked</arg>
+                        </compilerArgs>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -168,6 +174,9 @@
                         <version>6.0</version>
                     </dependency>
                 </dependencies>
+            </plugin>
+            <plugin>
+                <artifactId>maven-checkstyle-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
@@ -253,14 +262,38 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>com.github.devmix</groupId>
+                <artifactId>commons-adapters</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.devmix</groupId>
+                <artifactId>commons-i18n</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.devmix</groupId>
+                <artifactId>commons-collections</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>joda-time</groupId>
                 <artifactId>joda-time</artifactId>
                 <version>2.8</version>
             </dependency>
+
+            <!--apache commons-->
+
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
                 <version>3.3.2</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-collections</groupId>
+                <artifactId>commons-collections</artifactId>
+                <version>3.2.2</version>
             </dependency>
 
             <!--TESTS-->
@@ -274,12 +307,42 @@
                 <groupId>org.testng</groupId>
                 <artifactId>testng</artifactId>
                 <version>6.9.6</version>
+                <scope>test</scope>
+            </dependency>
+            <!--<dependency>-->
+            <!--<groupId>org.easytesting</groupId>-->
+            <!--<artifactId>fest-assert-core</artifactId>-->
+            <!--<version>2.0M10</version>-->
+            <!--<scope>test</scope>-->
+            <!--</dependency>-->
+            <dependency>
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-core</artifactId>
+                <version>3.3.0</version>
+                <scope>test</scope>
+            </dependency>
+
+            <!--tools-->
+
+            <dependency>
+                <groupId>org.javassist</groupId>
+                <artifactId>javassist</artifactId>
+                <version>3.18.1-GA</version>
+            </dependency>
+
+            <!--logging-->
+
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>1.7.7</version>
             </dependency>
             <dependency>
-                <groupId>org.easytesting</groupId>
-                <artifactId>fest-assert-core</artifactId>
-                <version>2.0M10</version>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-simple</artifactId>
+                <version>1.7.7</version>
             </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -288,6 +351,21 @@
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>
         </dependency>
+
+        <!--tests-->
+
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+        </dependency>
+        <!--<dependency>-->
+        <!--<groupId>org.easytesting</groupId>-->
+        <!--<artifactId>fest-assert-core</artifactId>-->
+        <!--</dependency>-->
     </dependencies>
 
 </project>

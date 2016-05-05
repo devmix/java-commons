@@ -40,6 +40,10 @@
             <groupId>com.github.devmix</groupId>
             <artifactId>commons-i18n</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.github.devmix</groupId>
+            <artifactId>commons-collections</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.javassist</groupId>

@@ -48,16 +48,7 @@ import java.awt.*;
  */
 public interface View {
 
-    //    <D extends ComponentDecorator<?>> D name(String name);
-    ComponentDecorator<?> name(String name);
-
-//    Verifier.Status verifyAll();
-//
-//    Verifier.Status verifyAll(String name);
-//
-//    Verifier.Status verifyAll(ComponentDecorator<?> decorator);
-//
-//    Verifier.Status verifyAll(VerifierIterator iterator);
+    ComponentDecorator<?> find(String name);
 
     VerifiersRegistry verifiers();
 

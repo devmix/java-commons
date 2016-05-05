@@ -30,7 +30,7 @@ import java.util.Map;
 
 import static com.github.devmix.commons.i18n.core.values.reference.ArgumentsFactory.none;
 import static com.github.devmix.commons.i18n.core.values.reference.ArgumentsFactory.plural;
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Sergey Grachev

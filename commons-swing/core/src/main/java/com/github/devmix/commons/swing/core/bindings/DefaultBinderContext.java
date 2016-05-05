@@ -18,6 +18,7 @@
 
 package com.github.devmix.commons.swing.core.bindings;
 
+import com.github.devmix.commons.collections.maps.SoftValueMap;
 import com.github.devmix.commons.swing.api.Controller;
 import com.github.devmix.commons.swing.api.View;
 import com.github.devmix.commons.swing.api.bindings.Binder;
@@ -25,7 +26,6 @@ import com.github.devmix.commons.swing.api.bindings.BinderContext;
 import com.github.devmix.commons.swing.api.bindings.ComponentBinder;
 import com.github.devmix.commons.swing.api.bindings.standard.ColumnBinding;
 import com.github.devmix.commons.swing.api.decorators.ComponentDecorator;
-import com.github.devmix.commons.swing.core.utils.SoftValueMap;
 import javassist.util.proxy.Proxy;
 import javassist.util.proxy.ProxyFactory;
 import org.jdesktop.beansbinding.AutoBinding;
@@ -65,7 +65,7 @@ final class DefaultBinderContext<C extends Controller, V extends View> implement
 
     @Override
     public ComponentBinder<C, V> bind(final String name) {
-        componentBinder.attachComponent(Objects.requireNonNull(view.name(name)));
+        componentBinder.attachComponent(Objects.requireNonNull(view.find(name)));
         return componentBinder;
     }
 
@@ -105,7 +105,7 @@ final class DefaultBinderContext<C extends Controller, V extends View> implement
         return null;
     }
 
-    private static enum PropertyType {
+    private enum PropertyType {
         STRING,
         COLUMNS
     }

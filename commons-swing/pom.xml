@@ -48,14 +48,14 @@
 
     <build>
         <plugins>
-            <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <inherited>true</inherited>
-                <configuration>
-                    <source>${maven.compiler.source}</source>
-                    <target>${maven.compiler.target}</target>
-                </configuration>
-            </plugin>
+            <!--<plugin>-->
+            <!--<artifactId>maven-compiler-plugin</artifactId>-->
+            <!--<inherited>true</inherited>-->
+            <!--<configuration>-->
+            <!--<source>${maven.compiler.source}</source>-->
+            <!--<target>${maven.compiler.target}</target>-->
+            <!--</configuration>-->
+            <!--</plugin>-->
             <plugin>
                 <artifactId>maven-checkstyle-plugin</artifactId>
             </plugin>
@@ -84,11 +84,6 @@
                 <artifactId>commons-swing-toolkit-weblaf</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <dependency>
-                <groupId>com.github.devmix</groupId>
-                <artifactId>commons-i18n</artifactId>
-                <version>${project.version}</version>
-            </dependency>
 
             <!--SWING-->
 
@@ -96,14 +91,6 @@
                 <groupId>org.jdesktop</groupId>
                 <artifactId>beansbinding</artifactId>
                 <version>1.2.1</version>
-            </dependency>
-
-            <!--TOOLS-->
-
-            <dependency>
-                <groupId>org.javassist</groupId>
-                <artifactId>javassist</artifactId>
-                <version>3.18.1-GA</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

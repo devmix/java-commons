@@ -23,7 +23,7 @@ import org.testng.annotations.Test;
 import java.util.Locale;
 
 import static com.github.devmix.commons.i18n.core.utils.NumericForms.formOf;
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Sergey Grachev

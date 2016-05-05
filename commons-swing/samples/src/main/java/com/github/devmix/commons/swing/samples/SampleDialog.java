@@ -76,7 +76,7 @@ public final class SampleDialog {
                                         .onAction(this::onCloseBtn), ToolbarLayout.END)
                                 .$(o -> {
                                     toolkit.utils().swing()
-                                            .equalizeComponentsSize(v.name("login-btn").$(), v.name("close-btn").$());
+                                            .equalizeComponentsSize(v.find("login-btn").$(), v.find("close-btn").$());
                                 }), BorderLayout.SOUTH));
 
         b.with(c, v)
