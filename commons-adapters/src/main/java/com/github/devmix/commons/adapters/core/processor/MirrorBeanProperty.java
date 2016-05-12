@@ -18,30 +18,43 @@
 
 package com.github.devmix.commons.adapters.core.processor;
 
-import com.github.devmix.commons.adapters.api.annotations.Adapter;
+import com.github.devmix.commons.adapters.api.annotations.BeanProperty;
 
-import javax.lang.model.type.TypeMirror;
+import java.lang.annotation.Annotation;
+import java.util.Objects;
 
 /**
- * Mirror of {@link Adapter} annotation
- *
  * @author Sergey Grachev
  */
-final class MirrorAdapter {
+@SuppressWarnings("ClassExplicitlyAnnotation")
+final class MirrorBeanProperty implements BeanProperty {
 
-    private final TypeMirror adaptee;
-    private final Adapter.Processing processing;
+    private final boolean skip;
 
-    public MirrorAdapter(final TypeMirror adaptee, final Adapter.Processing processing) {
-        this.adaptee = adaptee;
-        this.processing = processing;
+    public MirrorBeanProperty(final boolean skip) {
+        this.skip = skip;
     }
 
-    public TypeMirror adaptee() {
-        return adaptee;
+    @Override
+    public boolean skip() {
+        return skip;
     }
 
-    public Adapter.Processing processing() {
-        return processing;
+    @Override
+    public Class<? extends Annotation> annotationType() {
+        return BeanProperty.class;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final MirrorBeanProperty that = (MirrorBeanProperty) o;
+        return skip == that.skip;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(skip);
     }
 }

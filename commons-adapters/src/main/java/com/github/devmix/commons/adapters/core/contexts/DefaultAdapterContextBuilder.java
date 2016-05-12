@@ -21,10 +21,11 @@ package com.github.devmix.commons.adapters.core.contexts;
 import com.github.devmix.commons.adapters.api.AdapterContextBuilder;
 import com.github.devmix.commons.adapters.api.AdaptersContext;
 import com.github.devmix.commons.adapters.api.annotations.Adapter;
-import com.github.devmix.commons.adapters.api.annotations.DelegateRule;
+import com.github.devmix.commons.adapters.api.annotations.DelegateMethod;
 import com.github.devmix.commons.adapters.api.exceptions.AdapterGenerationException;
-import com.github.devmix.commons.adapters.core.utils.AdapterUtils;
 import com.github.devmix.commons.adapters.core.utils.Constants;
+import com.github.devmix.commons.adapters.core.utils.ContextUtils;
+import com.github.devmix.commons.adapters.core.utils.ProcessorUtils;
 import javassist.CannotCompileException;
 import javassist.ClassPool;
 import javassist.CtClass;
@@ -54,6 +55,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.github.devmix.commons.adapters.api.annotations.Adapter.Processing;
+import static com.github.devmix.commons.adapters.core.utils.ContextUtils.className;
 
 /**
  * @author Sergey Grachev
@@ -64,6 +66,7 @@ final class DefaultAdapterContextBuilder implements AdapterContextBuilder {
 
     private final Set<String> packages = new HashSet<>();
     private final DefaultAnnotationsScanner annotationsScanner = new DefaultAnnotationsScanner();
+    private Processing forcedProcessing;
 
     @Override
     public AdapterContextBuilder addPackage(final String packageName) {
@@ -80,13 +83,19 @@ final class DefaultAdapterContextBuilder implements AdapterContextBuilder {
         final long time = System.nanoTime();
         final Map<Class<?>, AdapterDescriptor> adapters;
         try {
-            adapters = generate(AdapterUtils.findClassesWithAnnotation(packages, Adapter.class));
+            adapters = generate(ContextUtils.findClassesWithAnnotation(packages, Adapter.class));
         } catch (IOException | ClassNotFoundException | CannotCompileException | NotFoundException e) {
             throw new AdapterGenerationException(e);
         }
         LOG.info("Generated {} ms", TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - time));
 
         return new DefaultAdaptersContext(adapters);
+    }
+
+    @Override
+    public AdapterContextBuilder forceProcessing(final Processing value) {
+        this.forcedProcessing = value;
+        return this;
     }
 
     private Map<Class<?>, AdapterDescriptor> generate(final Class<?>[] classes)
@@ -113,25 +122,32 @@ final class DefaultAdapterContextBuilder implements AdapterContextBuilder {
             return;
         }
 
-        if (adapterClass.isInterface()) {
-            throw new AdapterGenerationException("Annotation @Adapter not allowed for interfaces");
-        }
+//        if (adapterClass.isInterface()) {
+//            throw new AdapterGenerationException("Annotation @Adapter not allowed for interfaces");
+//        }
 
         final Adapter adapter = annotationsScanner.adapterFor(adapterClass);
         if (adapter == null || Processing.IGNORE.equals(adapter.processing())) {
             return;
         }
 
-        final Method adapteeMethod = annotationsScanner.adapteeFor(adapterClass);
+        final Adapter.Processing processing = forcedProcessing == null ? adapter.processing() : forcedProcessing;
+
+        Class generatedClass = !Processing.RUNTIME.equals(processing)
+                ? findCompiledImplementation(pool, adapterClass) : null;
+
+        Method adapteeMethod = annotationsScanner.adapteeFor(adapterClass);
         if (adapteeMethod == null) {
-            throw new AdapterGenerationException("Adapter '" + adapterClass + "' must contain adaptee provider method");
+            adapteeMethod = annotationsScanner.adapteeFor(generatedClass);
+            if (adapteeMethod == null) {
+                throw new AdapterGenerationException("Adapter '" + adapterClass + "' must contain adaptee provider method");
+            }
         }
 
         final Class<?> adapteeClass = getAdapteeClass(adapter, adapterClass, adapteeMethod);
 
-        Class generatedClass = findCompiledImplementation(pool, adapterClass);
         if (generatedClass == null) {
-            if (!Processing.COMPILE.equals(adapter.processing())) {
+            if (!Processing.COMPILE.equals(processing)) {
                 generatedClass = generateAdapter(pool, adapterClass, adapter, adapteeMethod, adapteeClass).toClass();
             }
         } else {
@@ -153,18 +169,18 @@ final class DefaultAdapterContextBuilder implements AdapterContextBuilder {
 
         final CtClass ctAdapterClass = pool.get(adapterClass.getName());
         final CtClass ctAdapteeClass = pool.get(adapteeClass.getName());
-        final CtClass ctImplementationClass = pool.makeClass(adapterClass.getName() + '$' + Constants.ADAPTER_RUNTIME_CLASS_NAME);
+        final CtClass ctImplementationClass = pool.makeClass(className(adapterClass, Constants.ADAPTER_RUNTIME_CLASS_NAME));
         ctImplementationClass.setSuperclass(ctAdapterClass);
 
-        final DelegateRule[] rules = annotationsScanner.globalDelegateRulesFor(adapterClass);
+        final DelegateMethod[] rules = annotationsScanner.globalDelegateMethodsOf(adapterClass);
 
         for (final CtMethod adapterMethod : ctAdapterClass.getMethods()) {
             if (!adapterMethod.isEmpty()
-                    || !AdapterUtils.isAcceptableMethod(adapterMethod.getName(), adapterMethod.getModifiers())) {
+                    || !ContextUtils.isAcceptableMethod(adapterMethod.getName(), adapterMethod.getModifiers())) {
                 continue;
             }
 
-            final Pair<CtMethod, DelegateRule> foundMethod = findMethod(rules, adapterMethod, ctAdapteeClass);
+            final Pair<CtMethod, DelegateMethod> foundMethod = findMethod(rules, adapterMethod, ctAdapteeClass);
             if (foundMethod == null) {
                 LOG.debug("No adaptee method for {}", adapterMethod);
                 continue;
@@ -184,19 +200,7 @@ final class DefaultAdapterContextBuilder implements AdapterContextBuilder {
 
     @Nullable
     private Class findCompiledImplementation(final ClassPool pool, final Class<?> adapterClass) {
-        final StringBuilder buffer = new StringBuilder();
-        if (adapterClass.isMemberClass()) {
-            buffer.append(adapterClass.getPackage().getName());
-            if (buffer.length() > 0) {
-                buffer.append('.');
-            }
-            buffer.append(adapterClass.getSimpleName());
-        } else {
-            buffer.append(adapterClass.getName());
-        }
-        buffer.append('$').append(Constants.ADAPTER_COMPILED_CLASS_NAME);
-
-        final String className = buffer.toString();
+        final String className = className(adapterClass, Constants.ADAPTER_COMPILED_CLASS_NAME);
         if (pool.find(className) != null) {
             try {
                 return Class.forName(className);
@@ -204,7 +208,6 @@ final class DefaultAdapterContextBuilder implements AdapterContextBuilder {
                 // ignore
             }
         }
-
         return null;
     }
 
@@ -221,7 +224,7 @@ final class DefaultAdapterContextBuilder implements AdapterContextBuilder {
                 final ParameterizedType adapterGeneric = (ParameterizedType) type;
                 final GenericDeclaration adapteeMethodOwner = adapteeReturnType.getGenericDeclaration();
                 if (adapterGeneric.getRawType().equals(adapteeMethodOwner)) {
-                    final int parameterIndex = AdapterUtils.typeVarIndex(adapteeReturnType);
+                    final int parameterIndex = ProcessorUtils.typeVarIndex(adapteeReturnType);
                     if (parameterIndex != -1) {
                         final Type actualType = adapterGeneric.getActualTypeArguments()[parameterIndex];
                         return (Class<?>) (actualType instanceof ParameterizedType
@@ -236,7 +239,7 @@ final class DefaultAdapterContextBuilder implements AdapterContextBuilder {
 
     private StringBuilder generateMethodCode(final Method adapteeMethod, final Class<?> adapteeClass,
                                              final CtClass ctAdapterClass, final CtMethod adapterMethod,
-                                             final CtMethod adaptedMethod, final DelegateRule rule, final CtClass[] parameters) throws NotFoundException {
+                                             final CtMethod adaptedMethod, final DelegateMethod rule, final CtClass[] parameters) throws NotFoundException {
 
         final StringBuilder sb = new StringBuilder("((")
                 .append(adapteeClass.getName()).append(") ").append(adapteeMethod.getName()).append("()).")
@@ -287,11 +290,11 @@ final class DefaultAdapterContextBuilder implements AdapterContextBuilder {
     }
 
     @Nullable
-    private Pair<CtMethod, DelegateRule> findMethod(final DelegateRule[] rules, final CtMethod method,
-                                                    final CtClass adapteeClass) throws ClassNotFoundException, NotFoundException {
-        Pair<CtMethod, DelegateRule> result = null;
+    private Pair<CtMethod, DelegateMethod> findMethod(final DelegateMethod[] rules, final CtMethod method,
+                                                      final CtClass adapteeClass) throws ClassNotFoundException, NotFoundException {
+        Pair<CtMethod, DelegateMethod> result = null;
 
-        final DelegateRule[] overrideRules = annotationsScanner.methodDelegateRulesOf(method);
+        final DelegateMethod[] overrideRules = annotationsScanner.methodDelegateMethodsOf(method);
         if (overrideRules != null && overrideRules.length > 0) {
             result = findTargetMethodByRules(overrideRules, method, adapteeClass);
         }
@@ -304,9 +307,9 @@ final class DefaultAdapterContextBuilder implements AdapterContextBuilder {
     }
 
     @Nullable
-    private Pair<CtMethod, DelegateRule> findTargetMethodByRules(final DelegateRule[] rules, final CtMethod method,
-                                                                 final CtClass adapteeClass) throws NotFoundException {
-        for (final DelegateRule item : rules) {
+    private Pair<CtMethod, DelegateMethod> findTargetMethodByRules(final DelegateMethod[] rules, final CtMethod method,
+                                                                   final CtClass adapteeClass) throws NotFoundException {
+        for (final DelegateMethod item : rules) {
             final CtMethod result = findTargetMethodByRule(item, method, adapteeClass);
             if (result != null) {
                 return Pair.of(result, item);
@@ -316,7 +319,7 @@ final class DefaultAdapterContextBuilder implements AdapterContextBuilder {
     }
 
     @Nullable
-    private CtMethod findTargetMethodByRule(final DelegateRule rule, final CtMethod adapterMethod, final CtClass adapteeClass) throws NotFoundException {
+    private CtMethod findTargetMethodByRule(final DelegateMethod rule, final CtMethod adapterMethod, final CtClass adapteeClass) throws NotFoundException {
         final String fullAdapterMethodName = adapterMethod.getName();
         final Pattern adapterMethodPattern = Pattern.compile(rule.from());
         final Matcher adapterMethodMatcher = adapterMethodPattern.matcher(fullAdapterMethodName);
@@ -329,7 +332,7 @@ final class DefaultAdapterContextBuilder implements AdapterContextBuilder {
                 ? adapterMethodMatcher.group(1) : fullAdapterMethodName;
         final Pattern adapteeMethodPattern = Pattern.compile(rule.to());
         for (final CtMethod adapteeMethod : adapteeClass.getMethods()) {
-            if (!AdapterUtils.isInvokableMethod(adapteeMethod)) {
+            if (!ContextUtils.isInvokableMethod(adapteeMethod)) {
                 continue;
             }
 

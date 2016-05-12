@@ -18,7 +18,8 @@
 
 package com.github.devmix.commons.adapters.core.commons;
 
-import com.github.devmix.commons.adapters.api.annotations.DelegateRule;
+import com.github.devmix.commons.adapters.api.annotations.BeanProperty;
+import com.github.devmix.commons.adapters.api.annotations.DelegateMethod;
 
 import javax.annotation.Nullable;
 
@@ -56,7 +57,7 @@ public interface AnnotationsScanner<C, A, S, M> {
      * @param object adapter for scanning
      * @return list of rules
      */
-    DelegateRule[] globalDelegateRulesFor(C object);
+    DelegateMethod[] globalDelegateMethodsOf(C object);
 
     /**
      * Method for search all delegation rules which will be applied to current method of adapter
@@ -64,5 +65,21 @@ public interface AnnotationsScanner<C, A, S, M> {
      * @param method adapter for scanning
      * @return list of rules
      */
-    DelegateRule[] methodDelegateRulesOf(M method);
+    DelegateMethod[] methodDelegateMethodsOf(M method);
+
+    /**
+     * Method for search all JavaBean rules which will be applied to all methods of adapter
+     *
+     * @param object adapter for scanning
+     * @return list of rules
+     */
+    BeanProperty[] globalBeanPropertiesOf(C object);
+
+    /**
+     * Method for search all JavaBean rules which will be applied to current method of adapter
+     *
+     * @param method adapter for scanning
+     * @return list of rules
+     */
+    BeanProperty[] methodBeanPropertiesOf(M method);
 }

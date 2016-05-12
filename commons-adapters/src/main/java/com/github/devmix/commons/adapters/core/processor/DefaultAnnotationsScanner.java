@@ -20,10 +20,11 @@ package com.github.devmix.commons.adapters.core.processor;
 
 import com.github.devmix.commons.adapters.api.annotations.Adaptee;
 import com.github.devmix.commons.adapters.api.annotations.Adapter;
-import com.github.devmix.commons.adapters.api.annotations.DelegateRule;
-import com.github.devmix.commons.adapters.api.annotations.DelegateRules;
+import com.github.devmix.commons.adapters.api.annotations.BeanProperty;
+import com.github.devmix.commons.adapters.api.annotations.DelegateMethod;
+import com.github.devmix.commons.adapters.api.annotations.DelegateMethods;
 import com.github.devmix.commons.adapters.core.commons.AbstractCachedAnnotationsScanner;
-import com.github.devmix.commons.adapters.core.utils.AdapterUtils;
+import com.github.devmix.commons.adapters.core.utils.ProcessorUtils;
 
 import javax.annotation.Nullable;
 import javax.lang.model.element.AnnotationMirror;
@@ -51,14 +52,16 @@ final class DefaultAnnotationsScanner extends AbstractCachedAnnotationsScanner<T
 
     private final Elements elements;
     private final Types types;
-    private final TypeElement elementDelegateRule;
-    private final TypeElement elementDelegateRules;
+    private final TypeElement elementDelegateMethod;
+    private final TypeElement elementDelegateMethods;
+    private final TypeElement elementBeanProperty;
 
     public DefaultAnnotationsScanner(final Elements elements, final Types types) {
         this.elements = elements;
         this.types = types;
-        this.elementDelegateRule = elements.getTypeElement(DelegateRule.class.getName());
-        this.elementDelegateRules = elements.getTypeElement(DelegateRules.class.getName());
+        this.elementDelegateMethod = elements.getTypeElement(DelegateMethod.class.getName());
+        this.elementDelegateMethods = elements.getTypeElement(DelegateMethods.class.getName());
+        this.elementBeanProperty = elements.getTypeElement(BeanProperty.class.getName());
     }
 
     @Nullable
@@ -78,7 +81,7 @@ final class DefaultAnnotationsScanner extends AbstractCachedAnnotationsScanner<T
 
         assert adaptee != null;
 
-        return new MirrorAdapter(adaptee, null, adapter.processing());
+        return new MirrorAdapter(adaptee, adapter.processing());
     }
 
     @Nullable
@@ -95,39 +98,80 @@ final class DefaultAnnotationsScanner extends AbstractCachedAnnotationsScanner<T
 
     @Nullable
     @Override
-    protected DelegateRule[] loadGlobalDelegateRules(final TypeElement object) {
-        final Set<DelegateRule> result = findDelegateRules(object.getAnnotationMirrors(), new HashSet<DelegateRule>());
-        return result.toArray(new DelegateRule[result.size()]);
+    protected DelegateMethod[] loadGlobalDelegateMethods(final TypeElement object) {
+        final Set<DelegateMethod> result = findDelegateMethods(object.getAnnotationMirrors(), new HashSet<DelegateMethod>());
+        return result.toArray(new DelegateMethod[result.size()]);
     }
 
     @Nullable
     @Override
-    protected DelegateRule[] loadMethodDelegateRules(final ExecutableElement method) {
-        final Set<DelegateRule> result = findDelegateRules(method.getAnnotationMirrors(), new HashSet<DelegateRule>());
-        return result.toArray(new DelegateRule[result.size()]);
+    protected DelegateMethod[] loadMethodDelegateMethods(final ExecutableElement method) {
+        final Set<DelegateMethod> result = findDelegateMethods(method.getAnnotationMirrors(), new HashSet<DelegateMethod>());
+        return result.toArray(new DelegateMethod[result.size()]);
     }
 
-    private Set<DelegateRule> findDelegateRules(final List<? extends AnnotationMirror> annotations, final Set<DelegateRule> result) {
+    @Nullable
+    @Override
+    protected BeanProperty[] loadGlobalBeanProperties(final TypeElement object) {
+        final Set<BeanProperty> result = findBeanProperties(object.getAnnotationMirrors(), new HashSet<BeanProperty>());
+        return result.toArray(new BeanProperty[result.size()]);
+    }
+
+    @Nullable
+    @Override
+    protected BeanProperty[] loadMethodBeanProperties(final ExecutableElement method) {
+        final Set<BeanProperty> result = findBeanProperties(method.getAnnotationMirrors(), new HashSet<BeanProperty>());
+        return result.toArray(new BeanProperty[result.size()]);
+    }
+
+    private Set<BeanProperty> findBeanProperties(final List<? extends AnnotationMirror> annotations, final Set<BeanProperty> result) {
         for (final AnnotationMirror annotationMirror : annotations) {
             final DeclaredType annotationType = annotationMirror.getAnnotationType();
-            if (types.isSameType(elementDelegateRule.asType(), annotationType)) {
-                result.add(convertDelegateRule(AdapterUtils.getAnnotationValues(annotationMirror)));
-            } else if (types.isSameType(elementDelegateRules.asType(), annotationType)) {
-                result.addAll(convertDelegateRules(AdapterUtils.getAnnotationValues(annotationMirror)));
+            if (types.isSameType(elementBeanProperty.asType(), annotationType)) {
+                result.add(convertBeanProperty(ProcessorUtils.getAnnotationValues(annotationMirror)));
             } else {
                 final Element element = annotationType.asElement();
-                if (element.getAnnotation(DelegateRule.class) != null || element.getAnnotation(DelegateRules.class) != null) {
-                    findDelegateRules(element.getAnnotationMirrors(), result);
+                if (element.getAnnotation(BeanProperty.class) != null) {
+                    findBeanProperties(element.getAnnotationMirrors(), result);
                 }
             }
         }
         return result;
     }
 
-    private DelegateRule convertDelegateRule(final Map<? extends ExecutableElement, ? extends AnnotationValue> fields) {
+    private BeanProperty convertBeanProperty(final Map<? extends ExecutableElement, ? extends AnnotationValue> fields) {
+        boolean skip = false;
+        for (final Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : fields.entrySet()) {
+            final String fieldName = entry.getKey().getSimpleName().toString();
+            final String fieldValue = String.valueOf(entry.getValue().getValue());
+            if ("skip".equals(fieldName)) {
+                skip = Boolean.parseBoolean(fieldValue);
+            }
+        }
+        return new MirrorBeanProperty(skip);
+    }
+
+    private Set<DelegateMethod> findDelegateMethods(final List<? extends AnnotationMirror> annotations, final Set<DelegateMethod> result) {
+        for (final AnnotationMirror annotationMirror : annotations) {
+            final DeclaredType annotationType = annotationMirror.getAnnotationType();
+            if (types.isSameType(elementDelegateMethod.asType(), annotationType)) {
+                result.add(convertDelegateMethod(ProcessorUtils.getAnnotationValues(annotationMirror)));
+            } else if (types.isSameType(elementDelegateMethods.asType(), annotationType)) {
+                result.addAll(convertDelegateMethods(ProcessorUtils.getAnnotationValues(annotationMirror)));
+            } else {
+                final Element element = annotationType.asElement();
+                if (element.getAnnotation(DelegateMethod.class) != null || element.getAnnotation(DelegateMethods.class) != null) {
+                    findDelegateMethods(element.getAnnotationMirrors(), result);
+                }
+            }
+        }
+        return result;
+    }
+
+    private DelegateMethod convertDelegateMethod(final Map<? extends ExecutableElement, ? extends AnnotationValue> fields) {
         String from = null;
         String to = null;
-        DelegateRule.ReturnValue returnValue = null;
+        DelegateMethod.ReturnValue returnValue = null;
         for (final Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : fields.entrySet()) {
             final String fieldName = entry.getKey().getSimpleName().toString();
             final String fieldValue = String.valueOf(entry.getValue().getValue());
@@ -136,17 +180,17 @@ final class DefaultAnnotationsScanner extends AbstractCachedAnnotationsScanner<T
             } else if ("to".equals(fieldName)) {
                 to = fieldValue;
             } else if ("returnValue".equals(fieldName)) {
-                returnValue = DelegateRule.ReturnValue.valueOf(fieldValue);
+                returnValue = DelegateMethod.ReturnValue.valueOf(fieldValue);
             }
         }
-        return new MirrorDelegateRule(from, to, returnValue);
+        return new MirrorDelegateMethod(from, to, returnValue);
     }
 
-    private Set<DelegateRule> convertDelegateRules(final Map<? extends ExecutableElement, ? extends AnnotationValue> fields) {
+    private Set<DelegateMethod> convertDelegateMethods(final Map<? extends ExecutableElement, ? extends AnnotationValue> fields) {
         if (fields.isEmpty()) {
             return Collections.emptySet();
         }
-        final Set<DelegateRule> result = new HashSet<>();
+        final Set<DelegateMethod> result = new HashSet<>();
         for (final Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : fields.entrySet()) {
             final String fieldName = entry.getKey().getSimpleName().toString();
             final AnnotationValue fieldValue = entry.getValue();
@@ -154,7 +198,7 @@ final class DefaultAnnotationsScanner extends AbstractCachedAnnotationsScanner<T
                 @SuppressWarnings("unchecked")
                 final Collection<AnnotationMirror> rules = (Collection<AnnotationMirror>) fieldValue.getValue();
                 for (final AnnotationMirror annotationMirror : rules) {
-                    result.add(convertDelegateRule(AdapterUtils.getAnnotationValues(annotationMirror)));
+                    result.add(convertDelegateMethod(ProcessorUtils.getAnnotationValues(annotationMirror)));
                 }
             }
         }

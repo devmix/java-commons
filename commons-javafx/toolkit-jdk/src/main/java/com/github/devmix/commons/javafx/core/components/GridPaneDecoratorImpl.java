@@ -19,7 +19,7 @@
 package com.github.devmix.commons.javafx.core.components;
 
 import com.github.devmix.commons.adapters.api.annotations.Adapter;
-import com.github.devmix.commons.adapters.api.annotations.DelegateRule;
+import com.github.devmix.commons.adapters.api.annotations.DelegateMethod;
 import com.github.devmix.commons.javafx.api.components.standard.GridPaneDecorator;
 import com.github.devmix.commons.javafx.api.utils.gridpane.ColumnConstraintsDecorator;
 import com.github.devmix.commons.javafx.api.utils.gridpane.RowConstraintsDecorator;
@@ -35,7 +35,7 @@ import javafx.scene.layout.RowConstraints;
  */
 @Adapter
 @DelegateWithToSet
-@DelegateRule(to = "add", from = "add")
+@DelegateMethod(to = "add", from = "add")
 abstract class GridPaneDecoratorImpl extends AbstractDecorator<GridPane> implements GridPaneDecorator {
 
     public GridPaneDecoratorImpl() {

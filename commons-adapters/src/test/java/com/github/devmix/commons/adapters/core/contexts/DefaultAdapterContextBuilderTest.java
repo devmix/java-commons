@@ -21,8 +21,8 @@ package com.github.devmix.commons.adapters.core.contexts;
 import com.github.devmix.commons.adapters.api.AdaptersContext;
 import com.github.devmix.commons.adapters.api.annotations.Adaptee;
 import com.github.devmix.commons.adapters.api.annotations.Adapter;
-import com.github.devmix.commons.adapters.api.annotations.DelegateRule;
-import com.github.devmix.commons.adapters.api.annotations.DelegateRules;
+import com.github.devmix.commons.adapters.api.annotations.DelegateMethod;
+import com.github.devmix.commons.adapters.api.annotations.DelegateMethods;
 import com.github.devmix.commons.adapters.api.exceptions.AdapterGenerationException;
 import javafx.util.Callback;
 import org.testng.annotations.Test;
@@ -39,7 +39,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Sergey Grachev
  */
-@Test
+@SuppressWarnings("groupsTestNG")
+@Test(groups = {"unit"})
 public class DefaultAdapterContextBuilderTest {
 
     @Test
@@ -48,9 +49,9 @@ public class DefaultAdapterContextBuilderTest {
                 .addPackage(DefaultAdapterContextBuilderTest.class.getPackage().getName())
                 .build();
 
-        assertFooAdapter(ctx.findAndCreate(ConcreteAdapteeAdapterImpl.class, new Object()));
-        assertFooAdapter(ctx.findAndCreate(ConcreteAdapteeAdapter.class, new Object()));
-        assertFooAdapter(ctx.<ConcreteAdapteeAdapter<?>>findAndCreateByAdaptee(ConcreteAdaptee.class, new Object()));
+        assertFooAdapter(ctx.create(ConcreteAdapteeAdapterImpl.class, new Object()));
+        assertFooAdapter(ctx.create(ConcreteAdapteeAdapter.class, new Object()));
+        assertFooAdapter(ctx.<ConcreteAdapteeAdapter<?>>createByAdaptee(ConcreteAdaptee.class, new Object()));
     }
 
     private void assertFooAdapter(final ConcreteAdapteeAdapter<?> adapter) {
@@ -216,7 +217,7 @@ public class DefaultAdapterContextBuilderTest {
 
     public interface AdapterInt<V extends String & Serializable> {
 
-        @DelegateRule(to = "set(.*)", from = "with2(.*)")
+        @DelegateMethod(to = "set(.*)", from = "with2(.*)")
         ConcreteAdapteeAdapter<V> with2IntField(int value);
 
         ConcreteAdapteeAdapter<V> withIntField(int value);
@@ -230,10 +231,10 @@ public class DefaultAdapterContextBuilderTest {
 
     public interface AdapterString {
         //        @RuleDelegateWithToSet
-        @DelegateRule(from = "with(.*)", to = "set(.*)")
-        @DelegateRules({
-                @DelegateRule(from = "with(.*)", to = "set(.*)"),
-                @DelegateRule(from = "with(.*)", to = "set(.*)")
+        @DelegateMethod(from = "with(.*)", to = "set(.*)")
+        @DelegateMethods({
+                @DelegateMethod(from = "with(.*)", to = "set(.*)"),
+                @DelegateMethod(from = "with(.*)", to = "set(.*)")
         })
         ConcreteAdapteeAdapter withStringField(String value);
     }
@@ -248,10 +249,10 @@ public class DefaultAdapterContextBuilderTest {
 
     //    @RuleDelegateWithToSet
     @Adapter(processing = Adapter.Processing.AUTO)
-    @DelegateRule(from = "with(.*)", to = "set(.*)")
-    @DelegateRules({
-            @DelegateRule(from = "with(.*)", to = "set(.*)"),
-            @DelegateRule(from = "with(.*)", to = "set(.*)")
+    @DelegateMethod(from = "with(.*)", to = "set(.*)")
+    @DelegateMethods({
+            @DelegateMethod(from = "with(.*)", to = "set(.*)"),
+            @DelegateMethod(from = "with(.*)", to = "set(.*)")
     })
     public static abstract class ConcreteAdapteeAdapterImpl<V extends String & Serializable>
             extends AbstractFooAdapterImpl<V, ConcreteAdaptee<V>>

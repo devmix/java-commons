@@ -20,8 +20,9 @@ package com.github.devmix.commons.adapters.core.contexts;
 
 import com.github.devmix.commons.adapters.api.annotations.Adaptee;
 import com.github.devmix.commons.adapters.api.annotations.Adapter;
-import com.github.devmix.commons.adapters.api.annotations.DelegateRule;
-import com.github.devmix.commons.adapters.api.annotations.DelegateRules;
+import com.github.devmix.commons.adapters.api.annotations.BeanProperty;
+import com.github.devmix.commons.adapters.api.annotations.DelegateMethod;
+import com.github.devmix.commons.adapters.api.annotations.DelegateMethods;
 import com.github.devmix.commons.adapters.core.commons.AbstractCachedAnnotationsScanner;
 import javassist.CtMethod;
 
@@ -56,14 +57,14 @@ final class DefaultAnnotationsScanner extends AbstractCachedAnnotationsScanner<C
 
     @Nullable
     @Override
-    protected DelegateRule[] loadGlobalDelegateRules(final Class<?> object) {
-        final Set<DelegateRule> result = findDelegateRules(object.getAnnotations(), new HashSet<DelegateRule>());
-        return result.toArray(new DelegateRule[result.size()]);
+    protected DelegateMethod[] loadGlobalDelegateMethods(final Class<?> object) {
+        final Set<DelegateMethod> result = findDelegateRules(object.getAnnotations(), new HashSet<DelegateMethod>());
+        return result.toArray(new DelegateMethod[result.size()]);
     }
 
     @Nullable
     @Override
-    protected DelegateRule[] loadMethodDelegateRules(final CtMethod method) {
+    protected DelegateMethod[] loadMethodDelegateMethods(final CtMethod method) {
         final Object[] objects;
         try {
             objects = method.getAnnotations();
@@ -80,19 +81,31 @@ final class DefaultAnnotationsScanner extends AbstractCachedAnnotationsScanner<C
             annotations[i] = (Annotation) objects[i];
         }
 
-        final Set<DelegateRule> result = findDelegateRules(annotations, new HashSet<DelegateRule>());
-        return result.toArray(new DelegateRule[result.size()]);
+        final Set<DelegateMethod> result = findDelegateRules(annotations, new HashSet<DelegateMethod>());
+        return result.toArray(new DelegateMethod[result.size()]);
     }
 
-    private Set<DelegateRule> findDelegateRules(final Annotation[] annotations, final Set<DelegateRule> result) {
+    @Nullable
+    @Override
+    protected BeanProperty[] loadGlobalBeanProperties(final Class<?> object) {
+        return null;
+    }
+
+    @Nullable
+    @Override
+    protected BeanProperty[] loadMethodBeanProperties(final CtMethod method) {
+        return null;
+    }
+
+    private Set<DelegateMethod> findDelegateRules(final Annotation[] annotations, final Set<DelegateMethod> result) {
         for (final Annotation annotation : annotations) {
-            if (annotation instanceof DelegateRule) {
-                result.add((DelegateRule) annotation);
-            } else if (annotation instanceof DelegateRules) {
-                Collections.addAll(result, ((DelegateRules) annotation).value());
+            if (annotation instanceof DelegateMethod) {
+                result.add((DelegateMethod) annotation);
+            } else if (annotation instanceof DelegateMethods) {
+                Collections.addAll(result, ((DelegateMethods) annotation).value());
             } else {
                 final Class<? extends Annotation> qualifier = annotation.annotationType();
-                if (qualifier.isAnnotationPresent(DelegateRule.class) || qualifier.isAnnotationPresent(DelegateRules.class)) {
+                if (qualifier.isAnnotationPresent(DelegateMethod.class) || qualifier.isAnnotationPresent(DelegateMethods.class)) {
                     findDelegateRules(qualifier.getAnnotations(), result);
                 }
             }

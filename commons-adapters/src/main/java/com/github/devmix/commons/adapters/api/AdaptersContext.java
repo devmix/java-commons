@@ -35,7 +35,7 @@ public interface AdaptersContext {
      * @return return new instance of adapter or null if adapter not found
      */
     @Nullable
-    <T> T findAndCreate(Class<? extends T> adapterClass);
+    <T> T create(Class<? extends T> adapterClass);
 
     /**
      * Find and create adapter with corresponding class and constructor
@@ -46,7 +46,7 @@ public interface AdaptersContext {
      * @return return new instance of adapter or null if adapter not found
      */
     @Nullable
-    <T> T findAndCreate(Class<? extends T> adapterClass, Object... constructorArgs);
+    <T> T create(Class<? extends T> adapterClass, Object... constructorArgs);
 
     /**
      * Find and create adapter for specific adaptee
@@ -56,7 +56,7 @@ public interface AdaptersContext {
      * @return return new instance of adapter or null if adapter not found
      */
     @Nullable
-    <T> T findAndCreateByAdaptee(Class<?> adapteeClass);
+    <T> T createByAdaptee(Class<?> adapteeClass);
 
     /**
      * Find and create adapter for specific adaptee with this arguments of constructor
@@ -67,5 +67,5 @@ public interface AdaptersContext {
      * @return return new instance of adapter or null if adapter not found
      */
     @Nullable
-    <T> T findAndCreateByAdaptee(Class<?> adapteeClass, Object... constructorArgs);
+    <T> T createByAdaptee(Class<?> adapteeClass, Object... constructorArgs);
 }

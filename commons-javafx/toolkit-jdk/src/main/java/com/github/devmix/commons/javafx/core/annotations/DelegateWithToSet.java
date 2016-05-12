@@ -18,7 +18,7 @@
 
 package com.github.devmix.commons.javafx.core.annotations;
 
-import com.github.devmix.commons.adapters.api.annotations.DelegateRule;
+import com.github.devmix.commons.adapters.api.annotations.DelegateMethod;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -30,6 +30,6 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.TYPE})
-@DelegateRule(from = "with(.*)", to = "set(.*)")
+@DelegateMethod(from = "with(.*)", to = "set(.*)")
 public @interface DelegateWithToSet {
 }

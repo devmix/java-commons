@@ -21,8 +21,8 @@ package com.github.devmix.commons.adapters;
 import com.github.devmix.commons.adapters.api.AdaptersContext;
 import com.github.devmix.commons.adapters.api.annotations.Adaptee;
 import com.github.devmix.commons.adapters.api.annotations.Adapter;
-import com.github.devmix.commons.adapters.api.annotations.DelegateRule;
-import com.github.devmix.commons.adapters.api.annotations.DelegateRules;
+import com.github.devmix.commons.adapters.api.annotations.DelegateMethod;
+import com.github.devmix.commons.adapters.api.annotations.DelegateMethods;
 import com.github.devmix.commons.adapters.api.exceptions.AdapterGenerationException;
 import com.github.devmix.commons.adapters.core.contexts.AdaptersContextBuilders;
 import org.testng.annotations.Test;
@@ -32,7 +32,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Sergey Grachev
  */
-@Test
+@SuppressWarnings("groupsTestNG")
+@Test(groups = {"unit"})
 public class GenericAdapterTest {
 
     public void test() throws AdapterGenerationException {
@@ -40,7 +41,7 @@ public class GenericAdapterTest {
                 .addPackage(GenericAdapterTest.class.getPackage().getName())
                 .build();
 
-        final NumberAdapter<Long, Number> number = ctx.findAndCreateByAdaptee(Number.class);
+        final NumberAdapter<Long, Number> number = ctx.createByAdaptee(Number.class);
 
         assert number != null;
 
@@ -95,11 +96,11 @@ public class GenericAdapterTest {
     }
 
     @Adapter(processing = Adapter.Processing.AUTO)
-    @DelegateRules({
-            @DelegateRule(from = "then(.*)", to = "do(.*)"),
-            @DelegateRule(from = "get", to = "getValue"),
-            @DelegateRule(from = "set", to = "initialize"),
-            @DelegateRule(from = "cast", to = "getValueCast", returnValue = DelegateRule.ReturnValue.RESULT)
+    @DelegateMethods({
+            @DelegateMethod(from = "then(.*)", to = "do(.*)"),
+            @DelegateMethod(from = "get", to = "getValue"),
+            @DelegateMethod(from = "set", to = "initialize"),
+            @DelegateMethod(from = "cast", to = "getValueCast", returnValue = DelegateMethod.ReturnValue.RESULT)
     })
     public static abstract class NumberAdapterImpl implements NumberAdapter<Long, Number> {
 

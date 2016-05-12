@@ -16,25 +16,28 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.github.devmix.commons.adapters.core.contexts;
+package com.github.devmix.commons.adapters.api.annotations;
 
-import com.github.devmix.commons.adapters.api.annotations.DelegateMethod;
-import com.github.devmix.commons.adapters.api.annotations.DelegateMethods;
-
-import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
 /**
+ * Annotation for generating JavaBean class using exists 'set*' and 'get*' methods of interface or abstract class. Can
+ * be used per class or per method. In case using concrete type of adaptee, generated JavaBean properties will be
+ * delegated to this adaptee.
+ *
  * @author Sergey Grachev
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.METHOD, ElementType.TYPE})
-@DelegateMethod(from = "with2(.*)", to = "set2(.*)", returnValue = DelegateMethod.ReturnValue.AUTO)
-@DelegateMethods({
-        @DelegateMethod(from = "with2(.*)", to = "set2(.*)", returnValue = DelegateMethod.ReturnValue.AUTO),
-        @DelegateMethod(from = "with3(.*)", to = "set3(.*)", returnValue = DelegateMethod.ReturnValue.AUTO)
-})
-public @interface RuleDelegateWithToSet {
+@Retention(RUNTIME)
+@Target({TYPE, METHOD})
+public @interface BeanProperty {
+
+    /**
+     * Used for skipping a concrete method or all methods of class during generation.
+     */
+    boolean skip() default false;
 }

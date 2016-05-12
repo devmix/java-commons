@@ -18,10 +18,13 @@
 
 package com.github.devmix.commons.adapters.api.annotations;
 
-import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * Rule which specify how delegate invocations of adapter methods to adaptee. If class annotated by this annotation
@@ -30,16 +33,9 @@ import java.lang.annotation.Target;
  *
  * @author Sergey Grachev
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE, ElementType.TYPE})
-public @interface DelegateRule {
-
-    /**
-     * Pattern of adaptee methods for matching to adapter methods. Is can be exact method name or regular expression
-     * with only one capturing group. Where capturing group will be contained part of name of adapter method. Example,
-     * for delegating to all of 'set' methods it can be - "set(.*)"
-     */
-    String to() default "";
+@Retention(RUNTIME)
+@Target({METHOD, ANNOTATION_TYPE, TYPE})
+public @interface DelegateMethod {
 
     /**
      * Pattern of adapter methods for matching to adaptee methods. Is can be exact method name or regular expression
@@ -47,6 +43,13 @@ public @interface DelegateRule {
      * for delegating to all of 'with' methods it can be - "with(.*)"
      */
     String from() default "";
+
+    /**
+     * Pattern of adaptee methods for matching to adapter methods. Is can be exact method name or regular expression
+     * with only one capturing group. Where capturing group will be contained part of name of adapter method. Example,
+     * for delegating to all of 'set' methods it can be - "set(.*)"
+     */
+    String to() default "";
 
     /**
      * Determines what kind of result must be returned from adapter method. By default used auto detection.
@@ -61,8 +64,8 @@ public @interface DelegateRule {
     enum ReturnValue {
         /**
          * 1. No return value if return type of adapter method is void.<br/>
-         * 2. Return result of invocation of adaptee method if return type of adapter method is accessible from return type
-         * of adaptee method<br/>
+         * 2. Return result of invocation of adaptee method if return type of adapter method is accessible from return
+         * type of adaptee method<br/>
          * 3. Return current instance of adapter if return type of adapter method is accessible from adapter type<br/>
          * 4. Return NULL otherwise
          */

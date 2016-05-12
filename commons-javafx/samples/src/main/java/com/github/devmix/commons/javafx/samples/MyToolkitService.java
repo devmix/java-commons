@@ -51,7 +51,7 @@ final class MyToolkitService extends AbstractToolkitService<View, DefaultUtils, 
         final ViewsFactory viewsFactory = Objects.requireNonNull(parent.get(VIEW_FACTORY));
 
         this.i18nFactory = parent.get(I18N_FACTORY);
-        this.viewsFactory = toolkitService -> adaptersContext.findAndCreate(MyViewImpl.class, viewsFactory.create(toolkitService));
+        this.viewsFactory = toolkitService -> adaptersContext.create(MyViewImpl.class, viewsFactory.create(toolkitService));
         this.utilsFactory = parent.get(UTILS_FACTORY);
     }
 

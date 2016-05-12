@@ -20,26 +20,17 @@ package com.github.devmix.commons.adapters.core.utils;
 
 import javassist.CtMethod;
 
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.AnnotationValue;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
-import javax.lang.model.type.TypeMirror;
 import java.io.File;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.TypeVariable;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -47,7 +38,7 @@ import java.util.Set;
  *
  * @author Sergey Grachev
  */
-public final class AdapterUtils {
+public final class ContextUtils {
 
     private static final EnumSet<Modifier> SEALED_METHOD_MODIFIEDS =
             EnumSet.of(Modifier.FINAL, Modifier.NATIVE, Modifier.PRIVATE);
@@ -55,7 +46,7 @@ public final class AdapterUtils {
     private static final int SEALED_METHOD_MODIFIEDS_INT =
             java.lang.reflect.Modifier.FINAL | java.lang.reflect.Modifier.NATIVE | java.lang.reflect.Modifier.PRIVATE;
 
-    private AdapterUtils() {
+    private ContextUtils() {
     }
 
     /**
@@ -129,60 +120,40 @@ public final class AdapterUtils {
         return !"finalize".equals(methodName) && (modifiers & SEALED_METHOD_MODIFIEDS_INT) == 0;
     }
 
-    public static boolean isInvokableMethod(final Element method) {
-        if (!ElementKind.METHOD.equals(method.getKind())) {
-            return false;
-        }
-
-        if (isFinalize(method.getSimpleName())) {
-            return false;
-        }
-
-        for (final Modifier modifier : method.getModifiers()) {
-            if (Modifier.PUBLIC.equals(modifier)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     public static boolean isInvokableMethod(final CtMethod method) {
         return !isFinalize(method.getName()) && java.lang.reflect.Modifier.isPublic(method.getModifiers());
     }
 
-    private static boolean isFinalize(final CharSequence name) {
+    public static boolean isFinalize(final CharSequence name) {
         return "finalize".equals(name);
     }
 
-    public static boolean isVoid(final TypeMirror type) {
-        final String className = type.toString();
-        return "void".equals(className) || Void.class.getName().equals(className);
+    public static String fieldNameToCamelCase(final String name) {
+        final char character = name.charAt(0);
+        if (character >= 'A' && character <= 'Z') {
+            final StringBuilder result = new StringBuilder(name);
+            result.setCharAt(0, Character.toLowerCase(character));
+            return result.toString();
+        }
+        return name;
     }
 
-    public static int typeVarIndex(final TypeVariable type) {
-        final TypeVariable<?>[] parameters = type.getGenericDeclaration().getTypeParameters();
-        int index = -1;
-        for (final TypeVariable<?> parameter : parameters) {
-            index++;
-            if (type.equals(parameter)) {
-                return index;
-            }
-        }
-        return -1;
-    }
+    public static String className(final Class<?> basedOn, final String className) {
+        final StringBuilder result = new StringBuilder();
 
-    public static Map<? extends ExecutableElement, ? extends AnnotationValue> getAnnotationValues(final AnnotationMirror annotation) {
-        final Map<ExecutableElement, AnnotationValue> result = new HashMap<>();
-        for (final Element e : annotation.getAnnotationType().asElement().getEnclosedElements()) {
-            if (ElementKind.METHOD.equals(e.getKind())) {
-                final AnnotationValue value = ((ExecutableElement) e).getDefaultValue();
-                if (value != null) {
-                    result.put((ExecutableElement) e, value);
-                }
-            }
+        final Package pkg = basedOn.getPackage();
+        if (pkg != null) {
+            result.append(pkg.getName()).append('.');
         }
-        result.putAll(annotation.getElementValues());
-        return result;
+
+        Class<?> enclosing = basedOn.getEnclosingClass();
+        while (enclosing != null) {
+            if (!enclosing.isInterface()) {
+                result.append(enclosing.getSimpleName()).append('$');
+            }
+            enclosing = enclosing.getEnclosingClass();
+        }
+
+        return result.append(basedOn.getSimpleName()).append('$').append(className).toString();
     }
 }

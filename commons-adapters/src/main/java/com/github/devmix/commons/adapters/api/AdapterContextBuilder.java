@@ -18,6 +18,7 @@
 
 package com.github.devmix.commons.adapters.api;
 
+import com.github.devmix.commons.adapters.api.annotations.Adapter;
 import com.github.devmix.commons.adapters.api.exceptions.AdapterGenerationException;
 
 /**
@@ -34,6 +35,15 @@ public interface AdapterContextBuilder {
      * @return instance of builder
      */
     AdapterContextBuilder addPackage(String packageName);
+
+    /**
+     * Forced type of processing for adapters. This parameter not overrides adapters which have attribute with value
+     * {@link com.github.devmix.commons.adapters.api.annotations.Adapter.Processing#IGNORE}.
+     *
+     * @param processing type of processing which will be applied to all adapters
+     * @return instance of builder
+     */
+    AdapterContextBuilder forceProcessing(Adapter.Processing processing);
 
     /**
      * Scan all packages for adapters and create context

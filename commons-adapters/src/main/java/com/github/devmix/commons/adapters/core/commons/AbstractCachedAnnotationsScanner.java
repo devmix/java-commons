@@ -18,7 +18,8 @@
 
 package com.github.devmix.commons.adapters.core.commons;
 
-import com.github.devmix.commons.adapters.api.annotations.DelegateRule;
+import com.github.devmix.commons.adapters.api.annotations.BeanProperty;
+import com.github.devmix.commons.adapters.api.annotations.DelegateMethod;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -32,11 +33,15 @@ import java.util.Map;
  */
 public abstract class AbstractCachedAnnotationsScanner<C, A, S, M> implements AnnotationsScanner<C, A, S, M> {
 
-    private static final DelegateRule[] EMPTY_RULES = new DelegateRule[0];
+    private static final DelegateMethod[] EMPTY_DELEGATE_METHODS = new DelegateMethod[0];
+    private static final BeanProperty[] EMPTY_BEAN_PROPERTIES = new BeanProperty[0];
 
-    private final Map<C, DelegateRule[]> delegateRules = new HashMap<>();
     private final Map<C, A> adapters = new HashMap<>();
     private final Map<C, S> adapteeMethods = new HashMap<>();
+    private final Map<C, DelegateMethod[]> globalDelegateMethods = new HashMap<>();
+    private final Map<M, DelegateMethod[]> methodDelegateMethods = new HashMap<>();
+    private final Map<C, BeanProperty[]> globalBeanProperties = new HashMap<>();
+    private final Map<M, BeanProperty[]> methodBeanProperties = new HashMap<>();
 
     @Nullable
     protected abstract A loadAdapterFor(C object);
@@ -45,10 +50,16 @@ public abstract class AbstractCachedAnnotationsScanner<C, A, S, M> implements An
     protected abstract S loadAdapteeMethod(C object);
 
     @Nullable
-    protected abstract DelegateRule[] loadGlobalDelegateRules(C object);
+    protected abstract DelegateMethod[] loadGlobalDelegateMethods(C object);
 
     @Nullable
-    protected abstract DelegateRule[] loadMethodDelegateRules(M method);
+    protected abstract DelegateMethod[] loadMethodDelegateMethods(M method);
+
+    @Nullable
+    protected abstract BeanProperty[] loadGlobalBeanProperties(C object);
+
+    @Nullable
+    protected abstract BeanProperty[] loadMethodBeanProperties(M method);
 
     @Nullable
     @Override
@@ -57,8 +68,7 @@ public abstract class AbstractCachedAnnotationsScanner<C, A, S, M> implements An
         if (cached != null) {
             return cached;
         }
-        adapters.put(object, loadAdapterFor(object));
-        return adapters.get(object);
+        return put(adapters, object, loadAdapterFor(object), null);
     }
 
     @Nullable
@@ -68,27 +78,51 @@ public abstract class AbstractCachedAnnotationsScanner<C, A, S, M> implements An
         if (cached != null) {
             return cached;
         }
-        adapteeMethods.put(object, loadAdapteeMethod(object));
-        return adapteeMethods.get(object);
+        return put(adapteeMethods, object, loadAdapteeMethod(object), null);
     }
 
     @Override
-    public DelegateRule[] globalDelegateRulesFor(final C object) {
-        final DelegateRule[] cached = delegateRules.get(object);
+    public DelegateMethod[] globalDelegateMethodsOf(final C object) {
+        final DelegateMethod[] cached = globalDelegateMethods.get(object);
         if (cached != null) {
             return cached;
         }
-        final DelegateRule[] rules = loadGlobalDelegateRules(object);
-        if (rules != null) {
-            delegateRules.put(object, rules);
-        } else {
-            delegateRules.put(object, EMPTY_RULES);
-        }
-        return delegateRules.get(object);
+        return put(globalDelegateMethods, object, loadGlobalDelegateMethods(object), EMPTY_DELEGATE_METHODS);
     }
 
     @Override
-    public DelegateRule[] methodDelegateRulesOf(final M method) {
-        return loadMethodDelegateRules(method);
+    public DelegateMethod[] methodDelegateMethodsOf(final M method) {
+        final DelegateMethod[] cached = methodDelegateMethods.get(method);
+        if (cached != null) {
+            return cached;
+        }
+        return put(methodDelegateMethods, method, loadMethodDelegateMethods(method), EMPTY_DELEGATE_METHODS);
+    }
+
+    @Override
+    public BeanProperty[] globalBeanPropertiesOf(final C object) {
+        final BeanProperty[] cached = globalBeanProperties.get(object);
+        if (cached != null) {
+            return cached;
+        }
+        return put(globalBeanProperties, object, loadGlobalBeanProperties(object), EMPTY_BEAN_PROPERTIES);
+    }
+
+    @Override
+    public BeanProperty[] methodBeanPropertiesOf(final M method) {
+        final BeanProperty[] cached = methodBeanProperties.get(method);
+        if (cached != null) {
+            return cached;
+        }
+        return put(methodBeanProperties, method, loadMethodBeanProperties(method), EMPTY_BEAN_PROPERTIES);
+    }
+
+    private <K, V> V put(final Map<K, V> map, final K key, @Nullable final V value, final V defaultValue) {
+        if (value != null) {
+            map.put(key, value);
+            return value;
+        }
+        map.put(key, defaultValue);
+        return defaultValue;
     }
 }

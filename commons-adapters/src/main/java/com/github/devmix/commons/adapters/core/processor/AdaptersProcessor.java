@@ -19,7 +19,7 @@
 package com.github.devmix.commons.adapters.core.processor;
 
 import com.github.devmix.commons.adapters.api.annotations.Adapter;
-import com.github.devmix.commons.adapters.core.utils.AdapterUtils;
+import com.github.devmix.commons.adapters.api.exceptions.AdapterGenerationException;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
@@ -30,9 +30,7 @@ import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
@@ -83,16 +81,16 @@ public class AdaptersProcessor extends AbstractProcessor {
 
         final Set<? extends Element> adapters = roundEnv.getElementsAnnotatedWith(annotations.iterator().next());
         for (final Element target : adapters) {
-            if (target.getKind() == ElementKind.CLASS) {
+            if (target.getKind() == ElementKind.CLASS || target.getKind() == ElementKind.INTERFACE) {
                 try {
                     processAdapter((TypeElement) target);
-                } catch (final IOException e) {
+                } catch (final IOException | AdapterGenerationException e) {
                     log.printMessage(Diagnostic.Kind.ERROR, e.getMessage());
                     e.printStackTrace();
                 }
             } else {
                 log.printMessage(Diagnostic.Kind.ERROR,
-                        "Annotation @" + Adapter.class.getSimpleName() + " not allowed for interfaces and final classes");
+                        "Annotation @" + Adapter.class.getSimpleName() + " not allowed for final classes");
             }
         }
 
@@ -105,25 +103,14 @@ public class AdaptersProcessor extends AbstractProcessor {
      * @param adapterClass super class of adapter
      * @throws IOException
      */
-    private void processAdapter(final TypeElement adapterClass) throws IOException {
+    private void processAdapter(final TypeElement adapterClass) throws IOException, AdapterGenerationException {
         final MirrorAdapter adapter = annotationsScanner.adapterFor(adapterClass);
         if (adapter == null || IGNORED.contains(adapter.processing())) {
             return;
         }
 
-        final ExecutableElement adapteeMethod = annotationsScanner.adapteeFor(adapterClass);
-        if (adapteeMethod == null) {
-            log.printMessage(Diagnostic.Kind.ERROR,
-                    "Adapter '" + adapterClass + "' must contain exactly one of adaptee provider method");
-            return;
-        }
-
-        final TypeMirror adaptee = AdapterUtils.isVoid(adapter.adaptee())
-                ? adapteeMethod.getReturnType() : adapter.adaptee();
-
-        final DefaultAdapterBuilder builder = new DefaultAdapterBuilder(
-                elementUtils, typeUtils, annotationsScanner, adapterClass, adaptee, adapteeMethod
-        ).declareMethodsOfAdaptee();
+        final GeneratorAdapter builder = new GeneratorAdapter(
+                elementUtils, typeUtils, annotationsScanner, adapterClass, adapter);
 
         final JavaFileObject jfo = filer.createSourceFile(builder.fullClassName());
         try (final Writer writer = jfo.openWriter()) {

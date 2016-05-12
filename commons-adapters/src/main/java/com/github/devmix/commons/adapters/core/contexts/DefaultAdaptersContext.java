@@ -43,28 +43,28 @@ final class DefaultAdaptersContext implements AdaptersContext {
 
     @Nullable
     @Override
-    public <T> T findAndCreate(final Class<? extends T> adapterClass) {
+    public <T> T create(final Class<? extends T> adapterClass) {
         final AdapterDescriptor descriptor = findDescriptorByAdapter(adapterClass);
         return descriptor == null ? null : descriptor.<T>createSilent();
     }
 
     @Nullable
     @Override
-    public <T> T findAndCreate(final Class<? extends T> adapterClass, final Object... constructorArgs) {
+    public <T> T create(final Class<? extends T> adapterClass, final Object... constructorArgs) {
         final AdapterDescriptor descriptor = findDescriptorByAdapter(adapterClass);
         return descriptor == null ? null : descriptor.<T>createSilent(constructorArgs);
     }
 
     @Nullable
     @Override
-    public <T> T findAndCreateByAdaptee(final Class<?> adapteeClass) {
+    public <T> T createByAdaptee(final Class<?> adapteeClass) {
         final AdapterDescriptor descriptor = findDescriptorByAdaptee(adapteeClass);
         return descriptor == null ? null : descriptor.<T>createSilent();
     }
 
     @Nullable
     @Override
-    public <T> T findAndCreateByAdaptee(final Class<?> adapteeClass, final Object... constructorArgs) {
+    public <T> T createByAdaptee(final Class<?> adapteeClass, final Object... constructorArgs) {
         final AdapterDescriptor descriptor = findDescriptorByAdaptee(adapteeClass);
         return descriptor == null ? null : descriptor.<T>createSilent(constructorArgs);
     }

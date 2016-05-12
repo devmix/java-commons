@@ -26,7 +26,7 @@ import com.github.devmix.commons.javafx.api.i18n.I18n;
  */
 public abstract class AbstractDecorator<T> {
 
-    protected T subject;
+    protected final T subject;
     protected final I18n<?> i18n;
 
     public AbstractDecorator(final T subject, final I18n<?> i18n) {

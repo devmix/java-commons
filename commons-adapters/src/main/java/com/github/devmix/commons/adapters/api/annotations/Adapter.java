@@ -18,10 +18,11 @@
 
 package com.github.devmix.commons.adapters.api.annotations;
 
-import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * Classes annotated by this annotation will be processed as adapters. Depending on value of {@link #processing()}
@@ -29,8 +30,8 @@ import java.lang.annotation.Target;
  *
  * @author Sergey Grachev
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
+@Retention(RUNTIME)
+@Target(TYPE)
 public @interface Adapter {
 
     /**

@@ -19,10 +19,10 @@ public final class Number {
 Adapter class:
 ``` java
 @Adapter
-@DelegateRules({
-        @DelegateRule(from = "then(.*)", to = "do(.*)"),
-        @DelegateRule(from = "get", to = "getValue"),
-        @DelegateRule(from = "set", to = "initialize")
+@DelegateMethods({
+        @DelegateMethod(from = "then(.*)", to = "do(.*)"),
+        @DelegateMethod(from = "get", to = "getValue"),
+        @DelegateMethod(from = "set", to = "initialize")
 })
 public abstract class NumberAdapter {
 
@@ -46,7 +46,7 @@ final AdaptersContext ctx = AdaptersContextBuilders.standard()
             .addPackage(...)
             .build();
 
-final NumberAdapter number = ctx.findAndCreateByAdaptee(Number.class);
+final NumberAdapter number = ctx.createByAdaptee(Number.class);
 
 System.out.println(number.set(10L).thenPlus(5L).thenMinus(2L).get());
 
@@ -86,11 +86,11 @@ public interface NumberAdapter<T, A> {
 Adapter class:
 ``` java
 @Adapter
-@DelegateRules({
-        @DelegateRule(from = "then(.*)", to = "do(.*)"),
-        @DelegateRule(from = "get", to = "getValue"),
-        @DelegateRule(from = "set", to = "initialize"),
-        @DelegateRule(from = "cast", to = "getValueCast", returnValue = DelegateRule.ReturnValue.RESULT)
+@DelegateMethods({
+        @DelegateMethod(from = "then(.*)", to = "do(.*)"),
+        @DelegateMethod(from = "get", to = "getValue"),
+        @DelegateMethod(from = "set", to = "initialize"),
+        @DelegateMethod(from = "cast", to = "getValueCast", returnValue = DelegateRule.ReturnValue.RESULT)
 })
 public abstract class NumberAdapterImpl implements NumberAdapter<Long, Number> {
 
@@ -106,7 +106,7 @@ final AdaptersContext ctx = AdaptersContextBuilders.standard()
             .addPackage(...)
             .build();
 
-final NumberAdapter<Long, Number> number = ctx.findAndCreateByAdaptee(Number.class);
+final NumberAdapter<Long, Number> number = ctx.createByAdaptee(Number.class);
 
 System.out.println(number.set(10L).thenPlus(5L).thenMinus(2L).get());
 
@@ -125,11 +125,11 @@ Annotation:
 ``` java
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.TYPE})
-@DelegateRule(from = "cast", to = "getValueCast", returnValue = DelegateRule.ReturnValue.RESULT)
-@DelegateRules({
-         @DelegateRule(from = "then(.*)", to = "do(.*)"),
-         @DelegateRule(from = "get", to = "getValue"),
-         @DelegateRule(from = "set", to = "initialize"),
+@DelegateMethod(from = "cast", to = "getValueCast", returnValue = DelegateRule.ReturnValue.RESULT)
+@DelegateMethods({
+         @DelegateMethod(from = "then(.*)", to = "do(.*)"),
+         @DelegateMethod(from = "get", to = "getValue"),
+         @DelegateMethod(from = "set", to = "initialize"),
 })
 public @interface DelegateNumber {
 }
@@ -144,5 +144,21 @@ public abstract class NumberAdapterImpl implements NumberAdapter<Long, Number> {
 
     @Adaptee
     public Number adaptee() { return number; }
+}
+```
+
+### Generation of JavaBean by interface
+
+``` java
+@Adapter
+@BeanProperty
+public interface JavaBeanGeneric<I, S> {
+    I getInteger();
+
+    void setInteger(I value);
+
+    S getString();
+
+    void setString(S value);
 }
 ```

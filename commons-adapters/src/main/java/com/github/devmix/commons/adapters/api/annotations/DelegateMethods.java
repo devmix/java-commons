@@ -18,17 +18,20 @@
 
 package com.github.devmix.commons.adapters.api.annotations;
 
-import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * @author Sergey Grachev
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.ANNOTATION_TYPE, ElementType.TYPE, ElementType.METHOD})
-public @interface DelegateRules {
+@Retention(RUNTIME)
+@Target({ANNOTATION_TYPE, TYPE, METHOD})
+public @interface DelegateMethods {
 
-    DelegateRule[] value() default {};
+    DelegateMethod[] value() default {};
 }

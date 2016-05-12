@@ -53,99 +53,99 @@ public final class DefaultView implements View {
 
     @Override
     public <T, D extends Decorator<T, D>> D create(final Class<D> decoratorClass) {
-        return JavaFXToolkitService.adapters().findAndCreate(decoratorClass);
+        return JavaFXToolkitService.adapters().create(decoratorClass);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <D extends Decorator<?, D>> D wrap(final Object instance) {
-        return (D) JavaFXToolkitService.adapters().findAndCreateByAdaptee(instance.getClass(), instance);
+        return (D) JavaFXToolkitService.adapters().createByAdaptee(instance.getClass(), instance);
     }
 
     @Override
     public NotificationPaneDecorator notificationPane() {
-        return JavaFXToolkitService.adapters().findAndCreate(NotificationPaneDecorator.class);
+        return JavaFXToolkitService.adapters().create(NotificationPaneDecorator.class);
     }
 
     @Override
     public StackPaneDecorator stackPane() {
-        return JavaFXToolkitService.adapters().findAndCreate(StackPaneDecorator.class);
+        return JavaFXToolkitService.adapters().create(StackPaneDecorator.class);
     }
 
     @Override
     public BorderPaneDecorator borderPane() {
-        return JavaFXToolkitService.adapters().findAndCreate(BorderPaneDecorator.class);
+        return JavaFXToolkitService.adapters().create(BorderPaneDecorator.class);
     }
 
     @Override
     public MenuBarDecorator menuBar() {
-        return JavaFXToolkitService.adapters().findAndCreate(MenuBarDecorator.class);
+        return JavaFXToolkitService.adapters().create(MenuBarDecorator.class);
     }
 
     @Override
     public MenuDecorator menu() {
-        return JavaFXToolkitService.adapters().findAndCreate(MenuDecorator.class, toolkitService.i18n());
+        return JavaFXToolkitService.adapters().create(MenuDecorator.class, toolkitService.i18n());
     }
 
     @Override
     public MenuItemDecorator menuItem() {
-        return JavaFXToolkitService.adapters().findAndCreate(MenuItemDecorator.class, toolkitService.i18n());
+        return JavaFXToolkitService.adapters().create(MenuItemDecorator.class, toolkitService.i18n());
     }
 
     @Override
     public TabPaneDecorator tabPane() {
-        return JavaFXToolkitService.adapters().findAndCreate(TabPaneDecorator.class);
+        return JavaFXToolkitService.adapters().create(TabPaneDecorator.class);
     }
 
     @Override
     public TabDecorator tab() {
-        return JavaFXToolkitService.adapters().findAndCreate(TabDecorator.class);
+        return JavaFXToolkitService.adapters().create(TabDecorator.class);
     }
 
     @Override
     public GridPaneDecorator gridPane() {
-        return JavaFXToolkitService.adapters().findAndCreate(GridPaneDecorator.class);
+        return JavaFXToolkitService.adapters().create(GridPaneDecorator.class);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <S> TableViewDecorator<S> tableView() {
-        return JavaFXToolkitService.adapters().findAndCreate(TableViewDecorator.class);
+        return JavaFXToolkitService.adapters().create(TableViewDecorator.class);
     }
 
     @Override
     public StatusBarDecorator statusBar() {
-        return JavaFXToolkitService.adapters().findAndCreate(StatusBarDecorator.class);
+        return JavaFXToolkitService.adapters().create(StatusBarDecorator.class);
     }
 
     @Override
     public MaskerPaneDecorator maskerPane() {
-        return JavaFXToolkitService.adapters().findAndCreate(MaskerPaneDecorator.class);
+        return JavaFXToolkitService.adapters().create(MaskerPaneDecorator.class);
     }
 
     @Override
     public ButtonDecorator button() {
-        return JavaFXToolkitService.adapters().findAndCreate(ButtonDecorator.class);
+        return JavaFXToolkitService.adapters().create(ButtonDecorator.class);
     }
 
     @Override
     public ContextMenuDecorator contextMenu() {
-        return JavaFXToolkitService.adapters().findAndCreate(ContextMenuDecorator.class);
+        return JavaFXToolkitService.adapters().create(ContextMenuDecorator.class);
     }
 
     @Override
     public TextDecorator text() {
-        return JavaFXToolkitService.adapters().findAndCreate(TextDecorator.class);
+        return JavaFXToolkitService.adapters().create(TextDecorator.class);
     }
 
     @Override
     public TextFieldDecorator textField() {
-        return JavaFXToolkitService.adapters().findAndCreate(TextFieldDecorator.class);
+        return JavaFXToolkitService.adapters().create(TextFieldDecorator.class);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <T> ListViewDecorator<T> listView() {
-        return JavaFXToolkitService.adapters().findAndCreate(ListViewDecorator.class);
+        return JavaFXToolkitService.adapters().create(ListViewDecorator.class);
     }
 }

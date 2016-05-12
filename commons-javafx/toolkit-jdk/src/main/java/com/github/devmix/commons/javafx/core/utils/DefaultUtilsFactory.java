@@ -60,7 +60,7 @@ public final class DefaultUtilsFactory implements UtilsFactory<DefaultUtils> {
         @SuppressWarnings("unchecked")
         @Override
         public <S, T> TableColumnDecorator<S, T> column() {
-            return JavaFXToolkitService.adapters().findAndCreate(TableColumnDecorator.class, toolkitService.i18n());
+            return JavaFXToolkitService.adapters().create(TableColumnDecorator.class, toolkitService.i18n());
         }
     }
 
@@ -74,12 +74,12 @@ public final class DefaultUtilsFactory implements UtilsFactory<DefaultUtils> {
 
         @Override
         public ColumnConstraintsDecorator columnConstraint() {
-            return JavaFXToolkitService.adapters().findAndCreate(ColumnConstraintsDecorator.class);
+            return JavaFXToolkitService.adapters().create(ColumnConstraintsDecorator.class);
         }
 
         @Override
         public RowConstraintsDecorator rowConstraint() {
-            return JavaFXToolkitService.adapters().findAndCreate(RowConstraintsDecorator.class);
+            return JavaFXToolkitService.adapters().create(RowConstraintsDecorator.class);
         }
     }
 }

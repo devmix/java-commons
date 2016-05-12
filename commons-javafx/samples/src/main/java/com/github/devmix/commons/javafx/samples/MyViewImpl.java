@@ -20,7 +20,7 @@ package com.github.devmix.commons.javafx.samples;
 
 import com.github.devmix.commons.adapters.api.annotations.Adaptee;
 import com.github.devmix.commons.adapters.api.annotations.Adapter;
-import com.github.devmix.commons.adapters.api.annotations.DelegateRule;
+import com.github.devmix.commons.adapters.api.annotations.DelegateMethod;
 import com.github.devmix.commons.javafx.api.views.View;
 import com.github.devmix.commons.javafx.core.components.DefaultView;
 
@@ -28,7 +28,7 @@ import com.github.devmix.commons.javafx.core.components.DefaultView;
  * @author Sergey Grachev
  */
 @Adapter(adaptee = DefaultView.class, processing = Adapter.Processing.RUNTIME)
-@DelegateRule(to = "(.*)", from = "(.*)")
+@DelegateMethod(to = "(.*)", from = "(.*)")
 abstract class MyViewImpl implements MyView {
 
     private final View parent;

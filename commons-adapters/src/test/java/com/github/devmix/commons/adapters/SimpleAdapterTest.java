@@ -3,8 +3,8 @@ package com.github.devmix.commons.adapters;
 import com.github.devmix.commons.adapters.api.AdaptersContext;
 import com.github.devmix.commons.adapters.api.annotations.Adaptee;
 import com.github.devmix.commons.adapters.api.annotations.Adapter;
-import com.github.devmix.commons.adapters.api.annotations.DelegateRule;
-import com.github.devmix.commons.adapters.api.annotations.DelegateRules;
+import com.github.devmix.commons.adapters.api.annotations.DelegateMethod;
+import com.github.devmix.commons.adapters.api.annotations.DelegateMethods;
 import com.github.devmix.commons.adapters.api.exceptions.AdapterGenerationException;
 import com.github.devmix.commons.adapters.core.contexts.AdaptersContextBuilders;
 import org.testng.annotations.Test;
@@ -14,7 +14,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Sergey Grachev
  */
-@Test
+@SuppressWarnings("groupsTestNG")
+@Test(groups = {"unit"})
 public class SimpleAdapterTest {
 
     public void test() throws AdapterGenerationException {
@@ -22,7 +23,7 @@ public class SimpleAdapterTest {
                 .addPackage(SimpleAdapterTest.class.getPackage().getName())
                 .build();
 
-        final NumberAdapter number = ctx.findAndCreateByAdaptee(Number.class);
+        final NumberAdapter number = ctx.createByAdaptee(Number.class);
 
         assert number != null;
 
@@ -52,10 +53,10 @@ public class SimpleAdapterTest {
     }
 
     @Adapter(processing = Adapter.Processing.AUTO)
-    @DelegateRules({
-            @DelegateRule(from = "then(.*)", to = "do(.*)"),
-            @DelegateRule(from = "get", to = "getValue"),
-            @DelegateRule(from = "set", to = "initialize")
+    @DelegateMethods({
+            @DelegateMethod(from = "then(.*)", to = "do(.*)"),
+            @DelegateMethod(from = "get", to = "getValue"),
+            @DelegateMethod(from = "set", to = "initialize")
     })
     public static abstract class NumberAdapter {
 
