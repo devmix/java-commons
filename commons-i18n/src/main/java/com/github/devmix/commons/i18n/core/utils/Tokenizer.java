@@ -380,7 +380,7 @@ public final class Tokenizer {
         return Boolean.valueOf(tokenValue);
     }
 
-    public static enum Token {
+    public enum Token {
         CODE_BEGIN,
         CODE_END,
         TEXT,
@@ -399,7 +399,7 @@ public final class Tokenizer {
         LEFTP
     }
 
-    public static enum State {
+    public enum State {
         TEXT,
         REFERENCE,
         PARAMETERS

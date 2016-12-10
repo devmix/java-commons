@@ -18,7 +18,7 @@
 
 package com.github.devmix.commons.swing.core.bindings;
 
-import com.github.devmix.commons.collections.maps.SoftValueMap;
+import com.github.devmix.commons.datastructures.maps.SoftValueMap;
 import com.github.devmix.commons.swing.api.Controller;
 import com.github.devmix.commons.swing.api.View;
 import com.github.devmix.commons.swing.api.bindings.Binder;

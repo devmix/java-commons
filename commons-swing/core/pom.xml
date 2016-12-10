@@ -42,7 +42,7 @@
         </dependency>
         <dependency>
             <groupId>com.github.devmix</groupId>
-            <artifactId>commons-collections</artifactId>
+            <artifactId>commons-data-structures</artifactId>
         </dependency>
 
         <dependency>

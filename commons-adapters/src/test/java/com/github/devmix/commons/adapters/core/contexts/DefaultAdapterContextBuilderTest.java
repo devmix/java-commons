@@ -24,7 +24,6 @@ import com.github.devmix.commons.adapters.api.annotations.Adapter;
 import com.github.devmix.commons.adapters.api.annotations.DelegateMethod;
 import com.github.devmix.commons.adapters.api.annotations.DelegateMethods;
 import com.github.devmix.commons.adapters.api.exceptions.AdapterGenerationException;
-import javafx.util.Callback;
 import org.testng.annotations.Test;
 
 import java.io.Serializable;
@@ -134,9 +133,8 @@ public class DefaultAdapterContextBuilderTest {
         public void setReturnDynAdapter(final V v) {
         }
 
-        public void setReturnDynAdapter2(final Callback<Map.Entry<V, V>, Boolean> arg0) {
-
-        }
+//        public void setReturnDynAdapter2(final Callback<Map.Entry<V, V>, Boolean> arg0) {
+//        }
 
         public <T, D extends Map<T, D>> D setMap(final Class<D> m) {
             return null;
@@ -168,7 +166,7 @@ public class DefaultAdapterContextBuilderTest {
     public interface Adapter3<A, V extends String & Serializable> {
         A withReturnDynAdapter(V v);
 
-        A withReturnDynAdapter2(Callback<Map.Entry<V, V>, Boolean> arg0);
+//        A withReturnDynAdapter2(Callback<Map.Entry<V, V>, Boolean> arg0);
     }
 
     public interface Adapter2<A, V extends String & Serializable> extends Adapter3<A, V> {

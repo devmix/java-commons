@@ -18,7 +18,7 @@
 
 package com.github.devmix.commons.swing.core.views;
 
-import com.github.devmix.commons.collections.maps.WeakValueMap;
+import com.github.devmix.commons.datastructures.maps.WeakValueMap;
 import com.github.devmix.commons.swing.api.decorators.ComponentDecorator;
 import com.github.devmix.commons.swing.api.views.ComponentsRegistry;
 import org.apache.commons.lang3.StringUtils;
