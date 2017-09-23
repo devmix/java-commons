@@ -48,7 +48,7 @@ public final class Caches {
     private static final WeakHashMap<Property, String> CACHE_GROUPS = new WeakHashMap<>();
     private static final WeakHashMap<Property, String> CACHE_KEYS = new WeakHashMap<>();
     private static final WeakHashMap<Property, String> CACHE_IDS = new WeakHashMap<>();
-    private static final WeakHashMap<Property, Object> CACHE_NULL_AS = new WeakHashMap<>();
+    private static final WeakHashMap<Property, Object> CACHE_VALUE = new WeakHashMap<>();
     private static final WeakHashMap<Property, Property.Type> CACHE_TYPE = new WeakHashMap<>();
     private static final WeakHashMap<Property, Property[]> CACHE_DEPENDENCIES = new WeakHashMap<>();
     private static final WeakHashMap<Annotation, java.util.regex.Pattern> CACHE_PATTERNS = new WeakHashMap<>();
@@ -70,6 +70,12 @@ public final class Caches {
     }
 
     @Nullable
+    public static Group groupRawOf(Property property) {
+        return property instanceof Property.Wrapper
+                ? ((Property.Wrapper) property).group() : property.getClass().getAnnotation(Group.class);
+    }
+
+    @Nullable
     public static String groupOf(final Property property) {
         synchronized (CACHE_GROUPS) {
             if (CACHE_GROUPS.containsKey(property)) {
@@ -77,10 +83,9 @@ public final class Caches {
             }
         }
 
-        Class<?> propertyClass = property.getClass();
-        Group group = property instanceof Property.Wrapper
-                ? ((Property.Wrapper) property).group() : propertyClass.getAnnotation(Group.class);
+        Group group = groupRawOf(property);
 
+        Class<?> propertyClass = property.getClass();
         final StringBuilder sb = new StringBuilder();
         while (group != null) {
             sb.insert(0, group.separator()).insert(0, isBlank(group.value())
@@ -106,6 +111,12 @@ public final class Caches {
         return result;
     }
 
+    @Nullable
+    public static Key keyRawOf(final Property property) {
+        return property instanceof Property.Wrapper
+                ? ((Property.Wrapper) property).key() : PropertiesUtils.findAnnotation(property, Key.class);
+    }
+
     public static String keyOf(final Property property) {
         synchronized (CACHE_KEYS) {
             if (CACHE_KEYS.containsKey(property)) {
@@ -113,8 +124,7 @@ public final class Caches {
             }
         }
 
-        final Key key = property instanceof Property.Wrapper
-                ? ((Property.Wrapper) property).key() : PropertiesUtils.findAnnotation(property, Key.class);
+        final Key key = keyRawOf(property);
 
         final String result;
         if (key != null) {
@@ -166,25 +176,29 @@ public final class Caches {
         return result;
     }
 
-    public static Object nullAsOf(final Property.Converter converter, final Property property) {
-        synchronized (CACHE_NULL_AS) {
-            if (CACHE_NULL_AS.containsKey(property)) {
-                return CACHE_NULL_AS.get(property);
+    @Nullable
+    public static String valueRawOf(final Property property) {
+        if (property instanceof Property.Wrapper) {
+            return ((Property.Wrapper) property).value();
+        } else {
+            final Value value = PropertiesUtils.findAnnotation(property, Value.class);
+            return value == null || isBlank(value.value()) ? null : value.value();
+        }
+    }
+
+    public static Object valueOf(final Property.Converter converter, final Property property) {
+        synchronized (CACHE_VALUE) {
+            if (CACHE_VALUE.containsKey(property)) {
+                return CACHE_VALUE.get(property);
             }
         }
 
-        final String nullAs;
-        if (property instanceof Property.Wrapper) {
-            nullAs = ((Property.Wrapper) property).nullAs();
-        } else {
-            final Value value = PropertiesUtils.findAnnotation(property, Value.class);
-            nullAs = value == null || isBlank(value.value()) ? null : value.value();
-        }
+        final String value = valueRawOf(property);
 
-        final Object result = nullAs == null ? null : converter.asOf(Caches.typeOf(property), nullAs);
-        synchronized (CACHE_NULL_AS) {
-            if (!CACHE_NULL_AS.containsKey(property)) {
-                CACHE_NULL_AS.put(property, result);
+        final Object result = value == null ? null : converter.asOf(Caches.typeOf(property), value);
+        synchronized (CACHE_VALUE) {
+            if (!CACHE_VALUE.containsKey(property)) {
+                CACHE_VALUE.put(property, result);
             }
         }
 

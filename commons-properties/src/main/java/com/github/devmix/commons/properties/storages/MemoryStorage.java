@@ -40,7 +40,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import static com.github.devmix.commons.properties.Caches.idOf;
 import static com.github.devmix.commons.properties.Caches.levelOf;
-import static com.github.devmix.commons.properties.Caches.nullAsOf;
+import static com.github.devmix.commons.properties.Caches.valueOf;
 import static com.github.devmix.commons.properties.Caches.typeOf;
 import static com.github.devmix.commons.properties.converters.Converters.basic;
 import static com.github.devmix.commons.properties.restrictions.validators.Validators.standard;
@@ -199,6 +199,11 @@ final class MemoryStorage implements Storage {
         }
 
         @Override
+        public Set<Property> properties() {
+            return null;
+        }
+
+        @Override
         public Property.Mutable get(final Property property) {
             final String id = idOf(property);
             final State state = stateOf(property);
@@ -260,6 +265,11 @@ final class MemoryStorage implements Storage {
             }
 
             return this;
+        }
+
+        @Override
+        public Property.Values put(final Property.Values values) {
+            throw new UnsupportedOperationException();
         }
 
         @Override
@@ -424,7 +434,7 @@ final class MemoryStorage implements Storage {
             private boolean fetched;
 
             public Value(final Property property) {
-                super(property, nullAsOf(basic(), property));
+                super(property, valueOf(basic(), property));
                 // clear default value
                 this.value = null;
             }
@@ -457,7 +467,7 @@ final class MemoryStorage implements Storage {
                         if (existsOnLevel != -1 && existsOnLevel >= levelOf(property).min()) {
                             return valuesOf(existsOnLevel).get(property).get();
                         }
-                        return nullAsOf(basic(), property);
+                        return valueOf(basic(), property);
                     }
 
                 } finally {
@@ -497,6 +507,11 @@ final class MemoryStorage implements Storage {
         }
 
         @Override
+        public Set<Property> properties() {
+            return properties;
+        }
+
+        @Override
         public Property.Immutable get(final Property property) {
             return properties.contains(property) ? valuesOf(level).get(property) : ValuesBuilder.nullValue();
         }
@@ -525,6 +540,11 @@ final class MemoryStorage implements Storage {
             valuesOf(level).put(available);
 
             return this;
+        }
+
+        @Override
+        public Property.Values put(final Property.Values values) {
+            throw new UnsupportedOperationException();
         }
 
         @Override

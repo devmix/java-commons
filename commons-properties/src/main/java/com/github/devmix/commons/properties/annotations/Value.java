@@ -48,19 +48,19 @@ public @interface Value {
 
     static final class Instance implements Value {
         private final Property.Type type;
-        private final String nullAs;
+        private final String value;
         private final boolean hidden;
         private final boolean secure;
 
-        public Instance(final Property.Type type, final String nullAs, final boolean hidden, final boolean secure) {
+        public Instance(final Property.Type type, final String value, final boolean hidden, final boolean secure) {
             this.type = type;
-            this.nullAs = nullAs == null ? "" : nullAs;
+            this.value = value == null ? "" : value;
             this.hidden = hidden;
             this.secure = secure;
         }
 
-        public Instance(final Property.Type type, final String nullAs) {
-            this(type, nullAs, false, false);
+        public Instance(final Property.Type type, final String value) {
+            this(type, value, false, false);
         }
 
         @Override
@@ -75,7 +75,7 @@ public @interface Value {
 
         @Override
         public String value() {
-            return nullAs;
+            return value;
         }
 
         @Override

@@ -25,7 +25,7 @@ import org.joda.time.LocalTime;
 import javax.annotation.Nullable;
 import java.io.Serializable;
 
-import static com.github.devmix.commons.properties.Caches.nullAsOf;
+import static com.github.devmix.commons.properties.Caches.valueOf;
 import static com.github.devmix.commons.properties.Caches.typeOf;
 import static com.github.devmix.commons.properties.converters.Converters.basic;
 
@@ -57,7 +57,7 @@ public class DefaultImmutable implements Property.Immutable, Serializable {
 
     @Nullable
     protected Object value() {
-        return this.value == null ? nullAsOf(basic(), property) : value;
+        return this.value == null ? valueOf(basic(), property) : value;
     }
 
     protected void value(@Nullable final Object value) {

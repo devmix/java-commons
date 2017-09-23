@@ -24,11 +24,17 @@ import com.github.devmix.commons.properties.exceptions.PropertyNonWritableExcept
 import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Sergey Grachev
  */
 final class NullValues implements Property.Values {
+
+    @Override
+    public Set<Property> properties() {
+        return Collections.emptySet();
+    }
 
     @Nullable
     @Override
@@ -43,6 +49,11 @@ final class NullValues implements Property.Values {
 
     @Override
     public Property.Values put(final Map<Property, Object> values) {
+        throw new PropertyNonWritableException();
+    }
+
+    @Override
+    public Property.Values put(Property.Values values) {
         throw new PropertyNonWritableException();
     }
 

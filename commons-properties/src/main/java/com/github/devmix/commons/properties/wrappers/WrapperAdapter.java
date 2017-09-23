@@ -51,7 +51,7 @@ public abstract class WrapperAdapter implements Property.Wrapper {
 
     @Nullable
     @Override
-    public String nullAs() {
+    public String value() {
         return null;
     }
 

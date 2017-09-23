@@ -25,10 +25,13 @@ import com.github.devmix.commons.properties.restrictions.Number;
 import com.github.devmix.commons.properties.restrictions.NumberTest;
 import com.github.devmix.commons.properties.storages.StorageTest;
 import com.github.devmix.commons.properties.storages.annotations.Levels;
+import com.github.devmix.commons.properties.values.ValuesBuilder;
 import org.testng.annotations.Test;
 
 import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Sergey Grachev
@@ -82,26 +85,37 @@ public final class WrapperTest {
                 new Annotation[]{new Number.Min.Instance(1), new Number.Max.Instance(10)}));
     }
 
+    //
+
+    @Test
+    public void testWrapperEqualToEnum () {
+        final Property.Values values = ValuesBuilder.newValues()
+                .put(TestProperties.prop1, "val1");
+
+        assertThat(values.get(TestProperties.prop1).asString()).isEqualTo("val1");
+        assertThat(values.get(Wrappers.wrap(TestProperties.prop1)).asString()).isEqualTo("val1");
+    }
+
     private static class TestWrapper extends WrapperAdapter {
 
-        private final String nullAs;
+        private final String value;
         private final Type type;
         private final Key key;
         private final Levels levels;
         private final Annotation[] restrictions;
 
-        private TestWrapper(final String key, final Type type, @Nullable final String nullAs,
+        private TestWrapper(final String key, final Type type, @Nullable final String value,
                             final Levels levels, final Annotation[] restrictions) {
-            this.nullAs = nullAs;
+            this.value = value;
             this.type = type;
             this.key = new Key.Instance(key);
             this.levels = levels;
             this.restrictions = restrictions;
         }
 
-        private TestWrapper(final String key, final Type type, @Nullable final String nullAs,
+        private TestWrapper(final String key, final Type type, @Nullable final String value,
                             final Levels levels) {
-            this.nullAs = nullAs;
+            this.value = value;
             this.type = type;
             this.key = new Key.Instance(key);
             this.levels = levels;
@@ -109,7 +123,7 @@ public final class WrapperTest {
         }
 
         private TestWrapper(final Key key, final Type type) {
-            this.nullAs = null;
+            this.value = null;
             this.type = type;
             this.key = key;
             this.levels = null;
@@ -134,8 +148,8 @@ public final class WrapperTest {
 
         @Nullable
         @Override
-        public String nullAs() {
-            return nullAs;
+        public String value() {
+            return value;
         }
 
         @Nullable
@@ -149,5 +163,10 @@ public final class WrapperTest {
         public Annotation[] restrictions() {
             return restrictions;
         }
+    }
+
+    @Group("grp1")
+    private enum TestProperties implements Property {
+        prop1;
     }
 }

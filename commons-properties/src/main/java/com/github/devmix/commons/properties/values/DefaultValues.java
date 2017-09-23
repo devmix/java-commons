@@ -25,10 +25,13 @@ import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import static com.github.devmix.commons.properties.Caches.idOf;
 import static com.github.devmix.commons.properties.converters.Converters.basic;
+import static com.github.devmix.commons.properties.values.ValuesBuilder.nullValue;
 
 /**
  * @author Sergey Grachev
@@ -45,6 +48,22 @@ final class DefaultValues implements Property.Values, Serializable {
     }
 
     @Override
+    public Set<Property> properties() {
+        synchronized (storage) {
+            if (storage.isEmpty()) {
+                return Collections.emptySet();
+            }
+
+            final Set<Property> result = new HashSet<>(storage.size());
+            for (final Property.Mutable mutable : storage.values()) {
+                result.add(mutable.property());
+            }
+
+            return result;
+        }
+    }
+
+    @Override
     public Property.Immutable get(final Property property) {
         final String id = idOf(property);
         Property.Mutable value;
@@ -52,11 +71,11 @@ final class DefaultValues implements Property.Values, Serializable {
             value = storage.get(id);
             if (value == null) {
                 if (autoCreate) {
-                    final Object defaultValue = Caches.nullAsOf(basic(), property);
+                    final Object defaultValue = Caches.valueOf(basic(), property);
                     value = ValuesBuilder.newMutable(property, defaultValue);
                     storage.put(id, value);
                 } else {
-                    return ValuesBuilder.nullValue();
+                    return nullValue();
                 }
             }
         }
@@ -87,6 +106,22 @@ final class DefaultValues implements Property.Values, Serializable {
             synchronized (storage) {
                 for (final Map.Entry<Property, Object> entry : values.entrySet()) {
                     put(entry.getKey(), entry.getValue());
+                }
+            }
+        }
+        return this;
+    }
+
+    @Override
+    public Property.Values put(final Property.Values values) {
+        final Set<Property> properties = values.properties();
+        if (!properties.isEmpty()) {
+            synchronized (storage) {
+                for (final Property property : properties) {
+                    final Property.Immutable value = values.get(property);
+                    if (value != nullValue()) {
+                        put(property, value.get());
+                    }
                 }
             }
         }

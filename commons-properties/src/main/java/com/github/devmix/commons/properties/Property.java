@@ -26,6 +26,7 @@ import org.joda.time.LocalTime;
 import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Sergey Grachev
@@ -43,7 +44,7 @@ public interface Property {
         Group group();
 
         @Nullable
-        String nullAs();
+        String value();
 
         @Nullable
         Levels levels();
@@ -53,6 +54,8 @@ public interface Property {
     }
 
     interface Values {
+
+        Set<Property> properties();
 
         /**
          * @return value of parameter,
@@ -64,6 +67,8 @@ public interface Property {
         Values put(Property property, @Nullable Object value);
 
         Values put(Map<Property, Object> values);
+
+        Values put(Values values);
 
         Values clear(Property property);
 
